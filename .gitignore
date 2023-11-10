@@ -1,0 +1,21 @@
+# Python cache files
+__pycache__/
+*.py[cod]
+
+# Environment files
+.env
+.venv/
+venv/
+ENV/
+
+# Database file
+database.fs
+*.index
+*.lock
+*.tmp
+
+# Log files
+*.log
+
+# VS Code
+.vscode

@@ -1,0 +1,55 @@
+
+from fastapi import FastAPI, Request, Form, HTTPException
+from fastapi.templating import Jinja2Templates
+from fastapi.responses import HTMLResponse, RedirectResponse
+from starlette.status import HTTP_302_FOUND
+import hashlib
+
+import json
+import ZODB, ZODB.FileStorage
+import transaction
+import persistent
+import re
+storage = ZODB.FileStorage.FileStorage('database.fs')
+db = ZODB.DB(storage)
+connection = db.open()
+root = connection.root
+
+app = FastAPI()
+
+templates = Jinja2Templates(directory="templates")
+
+def hash_password(password: str):
+    return hashlib.sha256(password.encode()).hexdigest()
+
+@app.get("/register", response_class=HTMLResponse)
+async def register(request: Request):
+    return templates.TemplateResponse("register.html", {"request": request})
+
+@app.post("/register", response_class=HTMLResponse)
+async def register(request: Request, email: str = Form(...), password: str = Form(...)):
+    students = root.students
+    if email in students:
+        raise HTTPException(status_code=400, detail="Email already registered")
+    if not re.match(r"[0-9]+@gmail\.com", email):
+        raise HTTPException(status_code=400, detail="Invalid email format")
+    hashed_password = hash_password(password)
+    new_student = Student(email, hashed_password)
+    students[email] = new_student
+    transaction.commit()
+    return RedirectResponse(url=f"/login", status_code=HTTP_302_FOUND)
+
+@app.get("/login", response_class=HTMLResponse)
+async def login(request: Request):
+    return templates.TemplateResponse("login.html", {"request": request})
+
+@app.post("/login", response_class=HTMLResponse)
+async def login(request: Request, email: str = Form(...), password: str = Form(...)):
+    students = root.students
+    if email in students and students[email].password == hash_password(password):
+        return RedirectResponse(url=f"/main/{email}", status_code=HTTP_302_FOUND)
+    return templates.TemplateResponse("error.html", {"request": request, "error": "Incorrect login"})
+
+@app.get("/main/{email}", response_class=HTMLResponse)
+async def main(request: Request, email: str):
+    return templates.TemplateResponse("main.html", {"request": request, "email": email})
