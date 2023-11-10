@@ -1,8 +1,7 @@
-
-from fastapi import FastAPI, Request, Form, HTTPException
+from fastapi import FastAPI, Request, Form, HTTPException, Depends
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import HTMLResponse, RedirectResponse
-from starlette.status import HTTP_302_FOUND
+from starlette.status import HTTP_302_FOUND, HTTP_303_SEE_OTHER
 import hashlib
 
 import json
@@ -50,6 +49,11 @@ async def login(request: Request, email: str = Form(...), password: str = Form(.
         return RedirectResponse(url=f"/main/{email}", status_code=HTTP_302_FOUND)
     return templates.TemplateResponse("error.html", {"request": request, "error": "Incorrect login"})
 
+def is_logged_in(email: str = None):
+    if email not in root.students:
+        raise HTTPException(status_code=HTTP_303_SEE_OTHER, detail="/login")
+    return email
+
 @app.get("/main/{email}", response_class=HTMLResponse)
-async def main(request: Request, email: str):
+async def main(request: Request, email: str = Depends(is_logged_in)):
     return templates.TemplateResponse("main.html", {"request": request, "email": email})
