@@ -2,8 +2,8 @@ from fastapi import FastAPI, Request, Form, HTTPException, Depends
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import HTMLResponse, RedirectResponse
 from starlette.status import HTTP_302_FOUND, HTTP_303_SEE_OTHER
+from datetime import datetime
 import hashlib
-import datetime
 import json
 import ZODB, ZODB.FileStorage
 from BTrees.OOBTree import BTree
@@ -71,12 +71,18 @@ async def main(request: Request, email: str = Depends(is_logged_in)):
 
 @app.get("/assignments/{date}", response_class=HTMLResponse)
 async def get_assignments(request: Request, date: str):
+    date_obj = datetime.strptime(date, "%d%m%Y")
     if date in root.assignments:
         assignment = root.assignments[date]
-        return templates.TemplateResponse("assignment.html", {"request": request, "assignment": assignment})
     else:
-        return templates.TemplateResponse("error.html", {"request": request, "error": "No assignments found for this date"})
+        assignment = Assignment("", "", date, "")
+    formatted_date = date_obj.strftime("%d / %B / %Y")
+    return templates.TemplateResponse("assignment.html", {"request": request, "assignment": assignment, "date": formatted_date})
 
+
+@app.get("/add_assignment", response_class=HTMLResponse)
+async def add_assignment_form(request: Request):
+    return templates.TemplateResponse("add_assignment.html", {"request": request})
 
 @app.post("/add_assignment", response_class=HTMLResponse)
 async def add_assignment(request: Request, email: str = Form(...), password: str = Form(...), assignment_name: str = Form(...), subject: str = Form(...), due_date: str = Form(...), detail: str = Form(...)):
@@ -97,6 +103,20 @@ async def get_assignments(request: Request, date: str):
         return templates.TemplateResponse("error.html", {"request": request, "error": "No assignments found for this date"})
 
 
+@app.post("/add_assignment")
+async def add_assignment(request: Request, email: str = Form(...), password: str = Form(...), assignment_name: str = Form(...), subject: str = Form(...), due_date: str = Form(...), detail: str = Form(...)):
+	students = root.students
+	if email in students and students[email].password == hash_password(password):
+		new_assignment = Assignment(assignment_name, subject, due_date, detail)
+		root.assignments[due_date] = new_assignment
+		transaction.commit()
+		return RedirectResponse(url=f"/main/{email}", status_code=HTTP_302_FOUND)
+	return templates.TemplateResponse("error.html", {"request": request, "error": "Incorrect login"})
+
+
+
+# DO NOT TOUCH ANYTHING BELOW THIS LINE
+
 @app.get("/admin", response_class=HTMLResponse)
 async def admin_login(request: Request):
     return templates.TemplateResponse("admin_login.html", {"request": request})
@@ -115,7 +135,7 @@ async def admin_action(request: Request, action: str = Form(...), key: str = For
     elif action == "delete":
         del root[key]
     elif action == "update":
-        root[key] = value
+        root[key] = value 
     else:
         return templates.TemplateResponse("error.html", {"request": request, "error": "Invalid action"})
     transaction.commit()

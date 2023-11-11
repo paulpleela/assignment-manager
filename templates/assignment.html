@@ -1,7 +1,9 @@
+
 <html>
 <head>
 <style>
-    body {
+
+	body {
 			font-family: Mali;
 			background-color: #f4f4f4;
 			margin: 0;
@@ -68,86 +70,126 @@
         text-decoration: underline;
     }
 
+	.modal {
+    display: none;
+	
+	}
+
+
 </style>
 </head>
 
 <body>
     <div class="header">
-        <p id = "day">Day</p>
-        <p id = "dmy">Date / Month / Year</p>
+        <p id = "dmy">{{ date }}</p>
     </div>
     <div class="content">
         <div class="topic">Assignments</div>
         <div id="list">
-            <p>HW_name ::: Subject</p>
-            <p>HW_name ::: Subject</p>
+            <!-- Assignments will be dynamically loaded here -->
         </div> 
-        <div id="click">Add assignment</div>
+		<button id="openModal">Add Assignment</button>
+		<div id="myModal" class="modal">
+			<!-- Modal content -->
+			<div class="modal-content">
+			<span class="close">×</span>
+			<form id="addAssignmentForm">
+				<label for="name">Assignment Name:</label><br>
+				<input type="text" id="name" name="name"><br>
+				<label for="subject">Subject:</label><br>
+				<input type="text" id="subject" name="subject"><br>
+				<label for="due_date">Due Date (ddmmyyyy):</label><br>
+				<input type="text" id="due_date" name="due_date"><br>
+				<label for="detail">Details:</label><br>
+				<textarea id="detail" name="detail"></textarea><br>
+				<input type="submit" value="Add Assignment">
+			</form>
+			</div>
+		</div>
+  
+
     </div>
 </body>
 <script>
-    data = {
-        "day" : "Wednesday" ,
-        "date" : ["21" , "21st"] ,
-        "month" : "September" ,
-        "year" : "2023" ,
-        "list" : [
-            {   
-                "name" :"HW11" , 
-                "subject" : "Web programming",
-                "content" : "",
-                "due" : "" ,
-                "comment" : [
-                    {
-                        "re" : "",
-                        "detail" : "" ,
-                        "user" : "" ,
-                        "time" : "" ,
-                    }
-                ]
-            },
-            {   
-                "name" :"Mini project" , 
-                "subject" : "Excel",
-                "content" : "",
-                "due" : "" ,
-                "comment" : [
-                    {
-                        "re" : "",
-                        "detail" : "" ,
-                        "user" : "" ,
-                        "time" : "" ,
-                    }
-                ]
-            },
-            {   
-                "name" :"Term paper" , 
-                "subject" : "Probability & Statistic",
-                "content" : "",
-                "due" : "" ,
-                "comment" : [
-                    {
-                        "re" : "",
-                        "detail" : "" ,
-                        "user" : "" ,
-                        "time" : "" ,
-                    }
-                ]
-            },
-        ]
-    } ;
+	let today = new Date();
+	let dd = String(today.getDate()).padStart(2, '0');
+	let mm = String(today.getMonth() + 1).padStart(2, '0'); //Starting from jan
+	let yyyy = today.getFullYear();
+	let date = dd + mm + yyyy;
 
-    document.getElementById("day").innerHTML = data.day ;
-    document.getElementById("dmy").innerHTML = data.date[1] + " " + data.month + " " + data.year ;
-    list = document.getElementById("list") ;
+	fetch('/assignments/' + date)
+		.then(response => {
+			if (!response.ok) {
+				// If the server returns an error, reload the page
+				location.reload();
+				throw new Error('No assignments found for this date');
+			}
+			return response.json();
+		})
+		.then(data => {
+			// Update date
+			document.getElementById("day").innerHTML = data.day;
+			document.getElementById("dmy").innerHTML = data.date[1] + " " + data.month + " " + data.year;
 
-    new_list_html = "" ;
+			// Load assignments
+			let list = document.getElementById("list");
+			list.innerHTML = '';
+			for(let item of data.list){
+				let p = document.createElement('p');
+				p.textContent = item.name + ":::" + item.subject;
+				list.appendChild(p);
+			}
+		})
+		.catch(error => console.error(error));
 
-    for(let item of data["list"]){
-        new_list_html += "<p>" + item["name"] +":::" + item["subject"] + "</p>"
-    }
+		var modal = document.getElementById("myModal");
+		var btn = document.getElementById("openModal");
+		var span = document.getElementsByClassName("close")[0];
+
+		btn.onclick = function() {
+		modal.style.display = "block";
+		}
+
+		span.onclick = function() {
+		modal.style.display = "none";
+		}
+
+		window.onclick = function(event) {
+		if (event.target == modal) {
+			modal.style.display = "none";
+		}
+		}
+
+		document.getElementById('addAssignmentForm').addEventListener('submit', function(event) {
+		event.preventDefault();
+		var name = document.getElementById('name').value;
+		var subject = document.getElementById('subject').value;
+		var due_date = document.getElementById('due_date').value;
+		var detail = document.getElementById('detail').value;
+
+		fetch('/add_assignment', {
+			method: 'POST',
+			headers: {
+			'Content-Type': 'application/json',
+			},
+			body: JSON.stringify({
+			name: name,
+			subject: subject,
+			due_date: due_date,
+			detail: detail
+			}),
+		})
+		.then(response => response.json())
+		.then(data => {
+			modal.style.display = "none";
+			loadAssignments();
+		})
+		.catch((error) => {
+			console.error('Error:', error);
+		});
+		});
 
 
-    list.innerHTML = new_list_html ;
+
 </script>
 </html>
