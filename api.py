@@ -41,7 +41,7 @@ async def register(request: Request, email: str = Form(...), password: str = For
     students = root.students
     if email in students:
         raise HTTPException(status_code=400, detail="Email already registered")
-    if not re.match(r"[0-9]+@gmail\.com", email):
+    if not re.match(r"[0-9]+@kmitl\.ac\.th", email):
         raise HTTPException(status_code=400, detail="Invalid email format")
     hashed_password = hash_password(password)
     new_student = Student(email, hashed_password)
@@ -95,3 +95,28 @@ async def get_assignments(request: Request, date: str):
         return templates.TemplateResponse("assignment.html", {"request": request, "assignment": assignment})
     else:
         return templates.TemplateResponse("error.html", {"request": request, "error": "No assignments found for this date"})
+
+
+@app.get("/admin", response_class=HTMLResponse)
+async def admin_login(request: Request):
+    return templates.TemplateResponse("admin_login.html", {"request": request})
+
+@app.post("/admin", response_class=HTMLResponse)
+async def admin_login(request: Request, password: str = Form(...)):
+    if password == "admin":
+        return templates.TemplateResponse("admin.html", {"request": request})
+    else:
+        return templates.TemplateResponse("error.html", {"request": request, "error": "Incorrect password"})
+
+@app.post("/admin_action", response_class=HTMLResponse)
+async def admin_action(request: Request, action: str = Form(...), key: str = Form(...), value: str = Form(...)):
+    if action == "add":
+        root[key] = value
+    elif action == "delete":
+        del root[key]
+    elif action == "update":
+        root[key] = value
+    else:
+        return templates.TemplateResponse("error.html", {"request": request, "error": "Invalid action"})
+    transaction.commit()
+    return RedirectResponse(url=f"/admin", status_code=HTTP_302_FOUND)

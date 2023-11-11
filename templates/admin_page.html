@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Admin Page</title>
+</head>
+<body>
+    <h1>Admin Page</h1>
+    <ul>
+    {% for key, value in data.items() %}
+        <li>
+            <form action="/admin_action" method="post">
+                <label for="key">{{ key }}:</label>
+                <input type="text" id="key" name="key" value="{{ key }}" readonly>
+                <input type="text" id="value" name="value" value="{{ value }}">
+                <input type="submit" name="action" value="Update">
+                <input type="submit" name="action" value="Delete">
+            </form>
+        </li>
+    {% endfor %}
+    </ul>
+    <form action="/admin_action" method="post">
+        <label for="key">New Key:</label>
+        <input type="text" id="key" name="key">
+        <label for="value">New Value:</label>
+        <input type="text" id="value" name="value">
+        <input type="submit" name="action" value="Add">
+    </form>
+</body>
+</html>
