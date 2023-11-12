@@ -129,25 +129,39 @@ async def add_assignment(request: Request, email: str = Form(...), password: str
 
 @app.get("/admin", response_class=HTMLResponse)
 async def admin_login(request: Request):
-    return templates.TemplateResponse("admin_login.html", {"request": request})
+	return templates.TemplateResponse("admin_login.html", {"request": request})
 
 @app.post("/admin", response_class=HTMLResponse)
 async def admin_login(request: Request, password: str = Form(...)):
     if password == "admin":
-        return templates.TemplateResponse("admin.html", {"request": request})
+        students = {email: student.__dict__ for email, student in root.students.items()}
+        assignments = {name: assignment.__dict__ for name, assignment in root.assignments.items()}
+        data = {
+            "students": students,
+            "assignments": assignments,
+        }
+        return templates.TemplateResponse("admin_page.html", {"request": request, "data": data})
     else:
         return templates.TemplateResponse("error.html", {"request": request, "error": "Incorrect password"})
 
-@app.post("/admin_action", response_class=HTMLResponse)
-async def admin_action(request: Request, action: str = Form(...), key: str = Form(...), value: str = Form(...)):
-    if action == "add":
-        root[key] = value
-    elif action == "delete":
-        del root[key]
-    elif action == "update":
-        root[key] = value 
-    else:
-        return templates.TemplateResponse("error.html", {"request": request, "error": "Invalid action"})
-    transaction.commit()
-    return RedirectResponse(url=f"/admin", status_code=HTTP_302_FOUND)
+# @app.post("/admin_action", response_class=HTMLResponse)
+# async def admin_action(request: Request, action: str = Form(...), key: str = Form(...), value: str = Form(...)):
+#     if action == "add":
+#         root[key] = value
+#     elif action == "delete":
+#         del root[key]
+#     elif action == "update":
+#         if key not in root:
+#             raise HTTPException(status_code=400, detail="Key not found")
+#         root[key] = value
+#     else:
+#         return templates.TemplateResponse("error.html", {"request": request, "error": "Invalid action"})
+#     transaction.commit()
 
+#     students = {email: student.__dict__ for email, student in root.students.items()}
+#     assignments = {name: assignment.__dict__ for name, assignment in root.assignments.items()}
+#     data = {
+#         "students": students,
+#         "assignments": assignments,
+#     }
+#     return templates.TemplateResponse("admin_page.html", {"request": request, "data": data})

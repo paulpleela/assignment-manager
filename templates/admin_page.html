@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!-- <!DOCTYPE html>
 <html>
 <head>
     <title>Admin Page</title>
@@ -15,6 +15,57 @@
                 <input type="submit" name="action" value="Update">
                 <input type="submit" name="action" value="Delete">
             </form>
+        </li>
+    {% endfor %}
+    </ul>
+    <form action="/admin_action" method="post">
+        <label for="key">New Key:</label>
+        <input type="text" id="key" name="key">
+        <label for="value">New Value:</label>
+        <input type="text" id="value" name="value">
+        <input type="submit" name="action" value="Add">
+    </form>
+
+	{% for key, value in data.items() %}
+    <li>
+        <form action="/admin_action" method="post">
+            <label for="key">Key:</label>
+            <input type="text" id="key" name="key" value="{{ key }}">
+            <label for="value">Value:</label>
+            <input type="text" id="value" name="value" value="{{ value }}">
+            <input type="submit" name="action" value="Update">
+            <input type="submit" name="action" value="Delete">
+        </form>
+    </li>
+	{% endfor %}
+
+</body>
+</html> -->
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Admin Page</title>
+</head>
+<body>
+    <h1>Admin Page</h1>
+    <ul>
+    {% for key, value in data.items() %}
+        <li>
+            <h2>{{ key }}</h2>
+            <ul>
+            {% for item_key, item_value in value.items() %}
+                <li>
+                    <form action="/admin_action" method="post">
+                        <label for="key">{{ item_key }}:</label>
+                        <input type="text" id="key" name="key" value="{{ item_key }}" readonly>
+                        <input type="text" id="value" name="value" value="{{ item_value }}">
+                        <input type="submit" name="action" value="Update">
+                        <input type="submit" name="action" value="Delete">
+                    </form>
+                </li>
+            {% endfor %}
+            </ul>
         </li>
     {% endfor %}
     </ul>
