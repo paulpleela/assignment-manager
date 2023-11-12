@@ -111,23 +111,28 @@
 
             <div class="list-box">
                 <h1>Events</h1>
-                <ul id="list-items"></ul>
+                <ul id="list-items">
+                    {% for event in events %}
+                        <li>{{ event }}</li>
+                    {% endfor %}
+                </ul>
             </div>
         </div>
 
         <script>
             let now = new Date();
-            let shownYear = now.getFullYear();
-            let shownMonth = now.getMonth();
+            let yyyymm = "{{ yyyymm }}";
+            let shownYear = parseInt(yyyymm.substring(0, 4), 10);
+            let shownMonth = parseInt(yyyymm.substring(4, 6), 10);
 
             const yearHeader = document.getElementById("year-header");
             const monthHeader = document.getElementById("month-header");
             const calendar = document.getElementById("calendar-body");
             
-            function generateCalendar(year, month) { // Month index parameter is 0 based.
+            function generateCalendar(year, month) {
+                month--; // Month index to 0 based.
                 yearHeader.innerHTML = shownYear;
-                monthHeader.innerHTML = new Date(shownYear, shownMonth).toLocaleDateString("en-US", {month: "long"});
-                calendar.innerHTML = "";
+                monthHeader.innerHTML = new Date(shownYear, month).toLocaleDateString("en-US", {month: "long"});
                 const firstDay = new Date(year, month, 1).getDay(); // Day is 0 based starting from Sunday.
                 const lastDate = new Date(year, month + 1, 0).getDate();
                 let date = 1;
@@ -152,42 +157,32 @@
             }
             generateCalendar(shownYear, shownMonth);
 
-            // This part needs to be moved to FastAPI/Jinja.
-            const items =  ["Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
-                            "Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
-                            "Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.",
-                            "Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."];
-            const listItems = document.getElementById("list-items");            
-            function generateList(year, month) {
-                for (const item of items) {
-                    const newItem = document.createElement("li");
-                    newItem.textContent = item;
-                    listItems.appendChild(newItem);
-                }
-            }
-            generateList(0, 0);
-            // -----
-
             function prevMonth() {
-                if (shownMonth > 0) {
+                if (shownMonth > 1) {
                     shownMonth--;
                 }
                 else {
-                    shownMonth = 11;
+                    shownMonth = 12;
                     shownYear--;
                 }
-                generateCalendar(shownYear, shownMonth);
+                shownMonth = shownMonth < 10 ? `0${shownMonth}` : `${shownMonth}`;
+                yyyymm = `${shownYear}${shownMonth}`;
+                let path = window.location.href.substring(0, window.location.href.lastIndexOf('/'));
+                window.location.href = `${path}/${yyyymm}`;
             }
 
             function nextMonth() {
-                if (shownMonth < 11) {
+                if (shownMonth < 12) {
                     shownMonth++;
                 }
                 else {
-                    shownMonth = 0;
+                    shownMonth = 1;
                     shownYear++;
                 }
-                generateCalendar(shownYear, shownMonth);
+                shownMonth = shownMonth < 10 ? `0${shownMonth}` : `${shownMonth}`;
+                yyyymm = `${shownYear}${shownMonth}`;
+                let path = window.location.href.substring(0, window.location.href.lastIndexOf('/'));
+                window.location.href = `${path}/${yyyymm}`;
             }
         </script>
     </body>
