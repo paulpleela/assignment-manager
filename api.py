@@ -14,6 +14,7 @@ storage = ZODB.FileStorage.FileStorage('database.fs')
 db = ZODB.DB(storage)
 connection = db.open()
 root = connection.root
+from fastapi import Depends
 
 class Assignment(persistent.Persistent):
     def __init__(self, name, subject, due_date, detail):
@@ -22,12 +23,20 @@ class Assignment(persistent.Persistent):
         self.due_date = due_date
         self.detail = detail
 
+class Student(persistent.Persistent):
+	def __init__(self, email, password, edit):
+		self.email = email
+		self.password = password
+		self.edit = edit
+
 root.students = BTree()
 root.assignments = BTree()
 
 app = FastAPI()
 
 templates = Jinja2Templates(directory="templates")
+
+
 
 def hash_password(password: str):
     return hashlib.sha256(password.encode()).hexdigest()
@@ -44,7 +53,7 @@ async def register(request: Request, email: str = Form(...), password: str = For
     if not re.match(r"[0-9]+@kmitl\.ac\.th", email):
         raise HTTPException(status_code=400, detail="Invalid email format")
     hashed_password = hash_password(password)
-    new_student = Student(email, hashed_password)
+    new_student = Student(email, hashed_password, False)
     students[email] = new_student
     transaction.commit()
     return RedirectResponse(url=f"/login", status_code=HTTP_302_FOUND)
@@ -65,12 +74,19 @@ def is_logged_in(email: str = None):
         raise HTTPException(status_code=HTTP_303_SEE_OTHER, detail="/login")
     return email
 
+def get_current_user(email: str = Depends(is_logged_in)):
+    return root.students[email]
+
+@app.get("/main/{email}", response_class=HTMLResponse)
+async def main(request: Request, current_user: Student = Depends(get_current_user)):
+    return templates.TemplateResponse("main.html", {"request": request, "user": current_user})
+
 @app.get("/main/{email}", response_class=HTMLResponse)
 async def main(request: Request, email: str = Depends(is_logged_in)):
     return templates.TemplateResponse("main.html", {"request": request, "email": email})
 
 @app.get("/assignments/{date}", response_class=HTMLResponse)
-async def get_assignments(request: Request, date: str):
+async def get_assignments(request: Request, date: str, current_user: Student = Depends(get_current_user)):
     date_obj = datetime.strptime(date, "%d%m%Y")
     if date in root.assignments:
         assignment = root.assignments[date]
@@ -79,6 +95,13 @@ async def get_assignments(request: Request, date: str):
     formatted_date = date_obj.strftime("%d / %B / %Y")
     return templates.TemplateResponse("assignment.html", {"request": request, "assignment": assignment, "date": formatted_date})
 
+@app.get("/assignments/{date}", response_class=HTMLResponse)
+async def get_assignments(request: Request, date: str, current_user: Student = Depends(get_current_user)):
+    if date in root.assignments:
+        assignment = root.assignments[date]
+        return templates.TemplateResponse("assignment.html", {"request": request, "assignment": assignment})
+    else:
+        return templates.TemplateResponse("error.html", {"request": request, "error": "No assignments found for this date"})
 
 @app.get("/add_assignment", response_class=HTMLResponse)
 async def add_assignment_form(request: Request):
@@ -94,14 +117,6 @@ async def add_assignment(request: Request, email: str = Form(...), password: str
         return RedirectResponse(url=f"/main/{email}", status_code=HTTP_302_FOUND)
     return templates.TemplateResponse("error.html", {"request": request, "error": "Incorrect login"})
 
-@app.get("/assignments/{date}", response_class=HTMLResponse)
-async def get_assignments(request: Request, date: str):
-    if date in root.assignments:
-        assignment = root.assignments[date]
-        return templates.TemplateResponse("assignment.html", {"request": request, "assignment": assignment})
-    else:
-        return templates.TemplateResponse("error.html", {"request": request, "error": "No assignments found for this date"})
-
 
 @app.post("/add_assignment")
 async def add_assignment(request: Request, email: str = Form(...), password: str = Form(...), assignment_name: str = Form(...), subject: str = Form(...), due_date: str = Form(...), detail: str = Form(...)):
@@ -112,6 +127,14 @@ async def add_assignment(request: Request, email: str = Form(...), password: str
 		transaction.commit()
 		return RedirectResponse(url=f"/main/{email}", status_code=HTTP_302_FOUND)
 	return templates.TemplateResponse("error.html", {"request": request, "error": "Incorrect login"})
+
+# @app.post("/main", response_class=HTMLResponse)
+# async def main(request: Request, email: str = Form(...), password: str = Form(...)):
+# 	students = root.students
+# 	if email in students and students[email].password == hash_password(password):
+# 		return RedirectResponse(url=f"/calendar/{email}", status_code=HTTP_302_FOUND)
+# 	return templates.TemplateResponse("error.html", {"request": request, "error": "Incorrect login"})
+
 
 
 
@@ -140,3 +163,4 @@ async def admin_action(request: Request, action: str = Form(...), key: str = For
         return templates.TemplateResponse("error.html", {"request": request, "error": "Invalid action"})
     transaction.commit()
     return RedirectResponse(url=f"/admin", status_code=HTTP_302_FOUND)
+
