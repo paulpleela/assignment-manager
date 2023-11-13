@@ -117,7 +117,7 @@
 	let yyyy = today.getFullYear();
 	let date = dd + mm + yyyy;
 
-	fetch('/assignments/' + date)
+	fetch("/{{ email }}" + '/assignments/' + date)
 		.then(response => {
 			if (!response.ok) {
 				// If the server returns an error, reload the page
