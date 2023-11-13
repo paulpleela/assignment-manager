@@ -87,7 +87,13 @@ async def get_by_month(request: Request, yyyymm: str, email: str = Depends(is_lo
         events = root.events[yyyymm]
     else:
         events = ["No upcoming events this month."]
-    return templates.TemplateResponse("main.html", {"request": request, "email": email, "events": events, "yyyymm": yyyymm})
+
+    assignment_days = []
+    for date, assignments_list in root.assignments.items():
+        assignment_yyyymm = date[4:8] + date[2:4]
+        if (assignment_yyyymm == yyyymm and assignments_list):
+            assignment_days.append(int(date[:2]))
+    return templates.TemplateResponse("main.html", {"request": request, "email": email, "events": events, "yyyymm": yyyymm, "assignment_days": assignment_days})
 
 @app.get("/{email}/assignments/{date}", response_class=HTMLResponse)
 async def get_assignments(request: Request, date: str, email: str = Depends(is_logged_in)):
