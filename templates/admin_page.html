@@ -22,6 +22,14 @@
                     </form>
                 </li>
             {% endfor %}
+			<li>
+				<form action="/admin_action" method="post">
+					<label for="key">Key:</label>
+					<input type="text" id="key" name="key">
+					<label for="value">Value:</label>
+					<input type="text" id="value" name="value">
+					<input type="submit" name="action" value="Create">
+				</form>
             </ul>
         </li>
     {% endfor %}
