@@ -124,6 +124,7 @@
             let yyyymm = "{{ yyyymm }}";
             let shownYear = parseInt(yyyymm.substring(0, 4), 10);
             let shownMonth = parseInt(yyyymm.substring(4, 6), 10);
+            let assignment_days = {{ assignment_days }};
 
             const yearHeader = document.getElementById("year-header");
             const monthHeader = document.getElementById("month-header");
@@ -147,6 +148,9 @@
                             newDate.textContent = date.toString();
                             if (date == now.getDate() && month == now.getMonth() && year == now.getFullYear()) {
                                 newDate.classList.add("bubble");
+                            }
+                            if (assignment_days.includes(date)) {
+                                newDate.classList.add("flag");
                             }
                             newDate.addEventListener("click", (function(date, shownMonth, shownYear) {
                                 return function() {
