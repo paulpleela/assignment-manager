@@ -150,6 +150,9 @@ async def admin_action(request: Request, action: str = Form(...), key: str = For
 		args : dict = eval(value) # Danger!!!
 		root.students[args['email']] = Student(args['email'], args['password'], args['edit'])
 		del root.students[key]
+	elif action == "Create":
+		args : dict = eval(value)
+		root.students[args['email']] = Student(args['email'], args['password'], args['edit'])
 	else:
 		return templates.TemplateResponse("error.html", {"request": request, "error": "Invalid action"})
 	transaction.commit()
