@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Request, Form, HTTPException, Depends
+from fastapi import FastAPI, Request, Form, HTTPException, Depends, Body
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import HTMLResponse, RedirectResponse
 from starlette.status import HTTP_302_FOUND, HTTP_303_SEE_OTHER
@@ -29,8 +29,14 @@ class Student(persistent.Persistent):
 		self.password = password
 		self.edit = edit
 
+class Event(persistent.Persistent):
+    def __init__(self, yyyymm, message):
+        self.yyyymm = yyyymm
+        self.events = [message]
+
 root.students = BTree()
 root.assignments = BTree()
+root.events = BTree()
 
 app = FastAPI()
 
@@ -66,42 +72,32 @@ async def login(request: Request):
 async def login(request: Request, email: str = Form(...), password: str = Form(...)):
     students = root.students
     if email in students and students[email].password == hash_password(password):
-        return RedirectResponse(url=f"/main/{email}", status_code=HTTP_302_FOUND)
+        yyyymm = datetime.now().strftime("%Y%m")
+        return RedirectResponse(url=f"/{email}/main/{yyyymm}", status_code=HTTP_302_FOUND)
     return templates.TemplateResponse("error.html", {"request": request, "error": "Incorrect login"})
 
 def is_logged_in(email: str = None):
     if email not in root.students:
         raise HTTPException(status_code=HTTP_303_SEE_OTHER, detail="/login")
-    return email
+    return root.students[email].email
 
-def get_current_user(email: str = Depends(is_logged_in)):
-    return root.students[email]
+@app.get("/{email}/main/{yyyymm}", response_class=HTMLResponse)
+async def get_by_month(request: Request, yyyymm: str, email: str = Depends(is_logged_in)):
+    if yyyymm in root.events:
+        events = root.events[yyyymm]
+    else:
+        events = ["No upcoming events this month."]
+    return templates.TemplateResponse("main.html", {"request": request, "email": email, "events": events, "yyyymm": yyyymm})
 
-@app.get("/main/{email}", response_class=HTMLResponse)
-async def main(request: Request, current_user: Student = Depends(get_current_user)):
-    return templates.TemplateResponse("main.html", {"request": request, "user": current_user})
-
-@app.get("/main/{email}", response_class=HTMLResponse)
-async def main(request: Request, email: str = Depends(is_logged_in)):
-    return templates.TemplateResponse("main.html", {"request": request, "email": email})
-
-@app.get("/assignments/{date}", response_class=HTMLResponse)
-async def get_assignments(request: Request, date: str, current_user: Student = Depends(get_current_user)):
+@app.get("/{email}/assignments/{date}", response_class=HTMLResponse)
+async def get_assignments(request: Request, date: str, email: str = Depends(is_logged_in)):
     date_obj = datetime.strptime(date, "%d%m%Y")
     if date in root.assignments:
-        assignment = root.assignments[date]
+        assignments = root.assignments[date]
     else:
-        assignment = Assignment("", "", date, "")
+        assignments = []
     formatted_date = date_obj.strftime("%d / %B / %Y")
-    return templates.TemplateResponse("assignment.html", {"request": request, "assignment": assignment, "date": formatted_date})
-
-@app.get("/assignments/{date}", response_class=HTMLResponse)
-async def get_assignments(request: Request, date: str, current_user: Student = Depends(get_current_user)):
-    if date in root.assignments:
-        assignment = root.assignments[date]
-        return templates.TemplateResponse("assignment.html", {"request": request, "assignment": assignment})
-    else:
-        return templates.TemplateResponse("error.html", {"request": request, "error": "No assignments found for this date"})
+    return templates.TemplateResponse("assignment.html", {"request": request, "email": email, "assignments": assignments, "date": formatted_date})
 
 @app.get("/add_assignment", response_class=HTMLResponse)
 async def add_assignment_form(request: Request):
@@ -111,22 +107,13 @@ async def add_assignment_form(request: Request):
 async def add_assignment(request: Request, email: str = Form(...), password: str = Form(...), assignment_name: str = Form(...), subject: str = Form(...), due_date: str = Form(...), detail: str = Form(...)):
     students = root.students
     if email in students and students[email].password == hash_password(password):
+        if due_date not in root.assignments:
+            root.assignments[due_date] = []
         new_assignment = Assignment(assignment_name, subject, due_date, detail)
-        root.assignments[due_date] = new_assignment
+        root.assignments[due_date].append(new_assignment)
         transaction.commit()
         return RedirectResponse(url=f"/main/{email}", status_code=HTTP_302_FOUND)
     return templates.TemplateResponse("error.html", {"request": request, "error": "Incorrect login"})
-
-
-@app.post("/add_assignment")
-async def add_assignment(request: Request, email: str = Form(...), password: str = Form(...), assignment_name: str = Form(...), subject: str = Form(...), due_date: str = Form(...), detail: str = Form(...)):
-	students = root.students
-	if email in students and students[email].password == hash_password(password):
-		new_assignment = Assignment(assignment_name, subject, due_date, detail)
-		root.assignments[due_date] = new_assignment
-		transaction.commit()
-		return RedirectResponse(url=f"/main/{email}", status_code=HTTP_302_FOUND)
-	return templates.TemplateResponse("error.html", {"request": request, "error": "Incorrect login"})
 
 # @app.post("/main", response_class=HTMLResponse)
 # async def main(request: Request, email: str = Form(...), password: str = Form(...)):
