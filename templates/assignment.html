@@ -199,7 +199,7 @@
 		.then(response => {
 			if (!response.ok) {
 				// If the server returns an error, reload the page
-				//location.reload();
+				location.reload();
 				throw new Error('No assignments found for this date');
 			}
 			return response.json();
