@@ -128,7 +128,7 @@
             const yearHeader = document.getElementById("year-header");
             const monthHeader = document.getElementById("month-header");
             const calendar = document.getElementById("calendar-body");
-            
+
             function generateCalendar(year, month) {
                 month--; // Month index to 0 based.
                 yearHeader.innerHTML = shownYear;
@@ -148,6 +148,14 @@
                             if (date == now.getDate() && month == now.getMonth() && year == now.getFullYear()) {
                                 newDate.classList.add("bubble");
                             }
+                            newDate.addEventListener("click", (function(date, shownMonth, shownYear) {
+                                return function() {
+                                    let clickedDate = date < 10 ? `0${date}` : `${date}`;
+                                    let clickedMonth = shownMonth < 10 ? `0${shownMonth}` : `${shownMonth}`;
+                                    let clickedYear = shownYear;
+                                    window.location.href = `/{{email}}/assignments/${clickedDate}${clickedMonth}${clickedYear}`;
+                                };
+                            })(date, shownMonth, shownYear));
                             date++;
                         }
                         newWeek.appendChild(newDate);
@@ -168,7 +176,7 @@
                 shownMonth = shownMonth < 10 ? `0${shownMonth}` : `${shownMonth}`;
                 yyyymm = `${shownYear}${shownMonth}`;
                 let path = window.location.href.substring(0, window.location.href.lastIndexOf('/'));
-                window.location.href = `${path}/${yyyymm}`;
+                window.location.href = `/{{email}}/main/${yyyymm}`;
             }
 
             function nextMonth() {
@@ -182,7 +190,7 @@
                 shownMonth = shownMonth < 10 ? `0${shownMonth}` : `${shownMonth}`;
                 yyyymm = `${shownYear}${shownMonth}`;
                 let path = window.location.href.substring(0, window.location.href.lastIndexOf('/'));
-                window.location.href = `${path}/${yyyymm}`;
+                window.location.href = `/{{email}}/main/${yyyymm}`;
             }
         </script>
     </body>
