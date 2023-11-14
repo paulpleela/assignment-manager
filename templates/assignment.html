@@ -53,7 +53,7 @@
     }
 
     select , input {
-        font-size:  25px;
+        font-size:  30px;
         font-family: Mali;
         width : 90% ;
         border-radius: 10px;
@@ -156,34 +156,6 @@
         <div id="list">
             <!-- Assignments will be dynamically loaded here -->
         </div> 
-		<button id="openModal">Add Assignment</button>
-		<div id="myModal" class="modal">
-			<!-- Modal content -->
-			<div class="modal-content">
-			<div class="close">×</div>
-			<form id="addAssignmentForm">
-				<table>
-					<tr>
-						<td><label for="name">Assignment Name:</label></td>
-						<td><input type="text" id="name" name="name"></td>
-					</tr>
-					<tr>
-						<td><label for="subject">Subject:</label></td>
-						<td><input type="text" id="subject" name="subject"></td>
-					</tr>
-					<tr>
-						<td><label for="due_date">Due Date (ddmmyyyy):</label></td>
-						<td><input type="text" id="due_date" name="due_date"></td>
-					</tr>
-					<tr>
-						<td><label for="detail">Details:</label></td>
-						<td><textarea id="detail" name="detail"></textarea></td>
-					</tr>
-				</table>
-				<input type="submit" value="Add Assignment" id = "submit">
-			</form>
-			</div>
-		</div>
   
 
     </div>
@@ -195,7 +167,7 @@
 	let yyyy = today.getFullYear();
 	let date = dd + mm + yyyy;
 
-	fetch(`/{{ email }}/assignments/${date}`)
+	fetch('/assignments/' + date)
 		.then(response => {
 			if (!response.ok) {
 				// If the server returns an error, reload the page
@@ -220,25 +192,6 @@
 		})
 		.catch(error => console.error(error));
 
-		var modal = document.getElementById("myModal");
-		var btn = document.getElementById("openModal");
-		var span = document.getElementsByClassName("close")[0];
-
-		btn.onclick = function() {
-		modal.style.display = "block";
-		btn.style.display = "none" ;
-		}
-
-		span.onclick = function() {
-		modal.style.display = "none";
-		btn.style.display = "block" ;
-		}
-
-		window.onclick = function(event) {
-		if (event.target == modal) {
-			modal.style.display = "none";
-		}
-		}
 
 		document.getElementById('addAssignmentForm').addEventListener('submit', function(event) {
 		event.preventDefault();
