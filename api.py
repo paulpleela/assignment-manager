@@ -136,9 +136,9 @@ async def admin_login(request: Request, password: str = Form(...)):
 		assignments = {name: assignment.__dict__ for name, assignment in root.assignments.items()}
 		events = {yyyymm: event.__dict__ for yyyymm, event in root.events.items()}
 		data = {
-			"students": students,
-			"assignments": assignments,
-			"event" : events
+			"Students": students,
+			"Assignments": assignments,
+			"Event" : events
 		}
 		return templates.TemplateResponse("admin_page.html", {"request": request, "data": data})
 	else:
@@ -164,8 +164,8 @@ async def admin_action(request: Request, action: str = Form(...), key: str = For
 	events = {yyyymm: event.__dict__ for yyyymm, event in root.events.items()}
 
 	data = {
-		"students": students,
-		"assignments": assignments,
-		"event" : events
+		"Students": students,
+		"Assignments": assignments,
+		"Event" : events
 	}
 	return templates.TemplateResponse("admin_page.html", {"request": request, "data": data})

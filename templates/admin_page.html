@@ -3,6 +3,64 @@
 <head>
     <title>Admin Page</title>
 </head>
+<style>
+	body {
+		font-family: Arial, sans-serif;
+		margin: 0;
+		padding: 0;
+		background-color: #f0f0f0;
+	}
+
+	h1 {
+		background-color: #333;
+		color: #fff;
+		padding: 10px 0;
+		text-align: center;
+	}
+
+	ul {
+		list-style-type: none;
+		margin: 0;
+		padding: 0;
+	}
+
+	li {
+		margin: 10px 0;
+	}
+
+	form {
+		display: flex;
+		flex-direction: column;
+		gap: 10px;
+	}
+
+	input[type="text"] {
+		padding: 5px;
+		border-radius: 5px;
+		border: 1px solid #ccc;
+	}
+
+	input[type="submit"] {
+		padding: 5px 10px;
+		border-radius: 5px;
+		border: none;
+		color: #fff;
+		cursor: pointer;
+	}
+
+	input[type="submit"][name="action"][value="Update"] {
+		background-color: #4CAF50;
+	}
+
+	input[type="submit"][name="action"][value="Delete"] {
+		background-color: #f44336;
+	}
+
+	input[type="submit"][name="action"][value="Create"] {
+		background-color: #008CBA;
+	}
+
+</style>
 <body>
     <h1>Admin Page</h1>
     <ul>
