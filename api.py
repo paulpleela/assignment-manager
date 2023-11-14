@@ -107,7 +107,7 @@ async def get_assignments(request: Request, date: str, email: str = Depends(is_l
 
 @app.get("/add_assignment", response_class=HTMLResponse)
 async def add_assignment_form(request: Request):
-    return templates.TemplateResponse("add_assignment.html", {"request": request})
+    return templates.TemplateResponse("admin_assignment.html", {"request": request})
 
 @app.post("/add_assignment", response_class=HTMLResponse)
 async def add_assignment(request: Request, email: str = Form(...), password: str = Form(...), assignment_name: str = Form(...), subject: str = Form(...), due_date: str = Form(...), detail: str = Form(...)):
