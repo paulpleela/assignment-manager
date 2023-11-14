@@ -3,10 +3,48 @@
 <head>
     <title>Admin Login</title>
 </head>
+<style>
+	body {
+		font-family: Arial, sans-serif;
+		margin: 0;
+		padding: 0;
+		background-color: #f0f0f0;
+	}
+
+	h1 {
+		background-color: #333;
+		color: #fff;
+		padding: 10px 0;
+		text-align: center;
+	}
+
+	form {
+		display: flex;
+		flex-direction: column;
+		gap: 10px;
+		width: 300px;
+		margin: 0 auto;
+	}
+
+	input[type="password"] {
+		padding: 2px;
+		border-radius: 5px;
+		border: 1px solid #ccc;
+	}
+
+	input[type="submit"] {
+		padding: 5px 10px;
+		border-radius: 5px;
+		border: none;
+		color: #fff;
+		cursor: pointer;
+		background-color: #4CAF50;
+	}
+
+</style>
 <body>
     <h1>Admin Login</h1>
     <form action="/admin" method="post">
-        <label for="password">Password:</label><br>
         <input type="password" id="password" name="password"><br>
         <input type="submit" value="Login">
     </form>
