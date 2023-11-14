@@ -171,16 +171,18 @@ async def admin_login(request: Request):
 
 @app.post("/admin", response_class=HTMLResponse)
 async def admin_login(request: Request, password: str = Form(...)):
-    if password == "admin":
-        students = {email: student.__dict__ for email, student in root.students.items()}
-        assignments = {name: assignment.__dict__ for name, assignment in root.assignments.items()}
-        data = {
-            "students": students,
-            "assignments": assignments,
-        }
-        return templates.TemplateResponse("admin_page.html", {"request": request, "data": data})
-    else:
-        return templates.TemplateResponse("error.html", {"request": request, "error": "Incorrect password"})
+	if password == "admin":
+		students = {email: student.__dict__ for email, student in root.students.items()}
+		assignments = {name: assignment.__dict__ for name, assignment in root.assignments.items()}
+		events = {yyyymm: event.__dict__ for yyyymm, event in root.events.items()}
+		data = {
+			"students": students,
+			"assignments": assignments,
+			"event" : events
+		}
+		return templates.TemplateResponse("admin_page.html", {"request": request, "data": data})
+	else:
+		return templates.TemplateResponse("error.html", {"request": request, "error": "Incorrect password"})
 
 @app.post("/admin_action", response_class=HTMLResponse)
 async def admin_action(request: Request, action: str = Form(...), key: str = Form(...), value: str = Form(...)):
@@ -199,8 +201,11 @@ async def admin_action(request: Request, action: str = Form(...), key: str = For
 
 	students = {email: student.__dict__ for email, student in root.students.items()}
 	assignments = {name: assignment.__dict__ for name, assignment in root.assignments.items()}
+	events = {yyyymm: event.__dict__ for yyyymm, event in root.events.items()}
+
 	data = {
 		"students": students,
 		"assignments": assignments,
+		"event" : events
 	}
 	return templates.TemplateResponse("admin_page.html", {"request": request, "data": data})
