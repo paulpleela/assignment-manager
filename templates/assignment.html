@@ -16,7 +16,7 @@
 
         padding-left: 10px ;
         height: 100%;
-        background-color: #494949;
+        background-color: #007BFF;
         color: #f4f4f4;
 
         writing-mode: vertical-lr;
@@ -39,7 +39,7 @@
         vertical-align: top;
         height: 70px;
         padding-left: 30px;
-		color: #f4f4f4;
+		color: black;
         font-size: 25px;
     }
 
@@ -53,7 +53,7 @@
     }
 
     select , input {
-        font-size:  30px;
+        font-size:  25px;
         font-family: Mali;
         width : 90% ;
         border-radius: 10px;
@@ -61,9 +61,9 @@
 
     div.content{
         margin-left : 260px ;
-        background-color: #494949;
+        background-color: white;
         height: 100%;
-        color: #f4f4f4;
+        color: black;
         font-size: 25px;
         text-align : center ;
     }
@@ -90,7 +90,7 @@
         margin-bottom: 10px;
         border-radius: 20px;
 
-        background-color: #808080;
+        background-color: #9ccbfe;
         border: 5px solid rgb(0, 0, 0);
     }
 
@@ -122,7 +122,7 @@
         font-family: Mali;
         font-size: 25px;
         cursor: pointer;
-        background-color: #ffbebe;
+        background-color: #9ccbfe;
         border-radius: 20px;
 
         align-items: center;
@@ -199,7 +199,7 @@
 		.then(response => {
 			if (!response.ok) {
 				// If the server returns an error, reload the page
-				location.reload();
+				//location.reload();
 				throw new Error('No assignments found for this date');
 			}
 			return response.json();
