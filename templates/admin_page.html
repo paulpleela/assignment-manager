@@ -69,6 +69,7 @@
             <h2>{{ key }}</h2>
             <ul>
             {% for item_key, item_value in value.items() %}
+                {% if key != "Logs" %}
                 <li>
                     <form action="/admin_action" method="post">
                         <label for="key">{{ item_key }}:</label>
@@ -79,7 +80,11 @@
                         <input type="submit" name="action" value="Delete">
                     </form>
                 </li>
+                {% else %}
+                <li>{{ item_key }}: {{ item_value }}</li>
+                {% endif %}
             {% endfor %}
+			{% if key != "Logs" %}
 			<li>
 				<form action="/admin_action" method="post">
 					<label for="key">Key:</label>
@@ -88,6 +93,7 @@
 					<input type="text" id="value" name="value">
 					<input type="submit" name="action" value="Create">
 				</form>
+			{% endif %}
             </ul>
         </li>
     {% endfor %}

@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Admin Log</title>
+</head>
+<body>
+    <h1>Admin Log</h1>
+    <table>
+        <tr>
+            <th>Email</th>
+            <th>Time</th>
+            <th>IP Address</th>
+        </tr>
+        {% for log in logs %}
+        <tr>
+            <td>{{ log.email }}</td>
+            <td>{{ log.time }}</td>
+            <td>{{ log.ip_address }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+</body>
+</html>
