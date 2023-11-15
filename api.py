@@ -50,9 +50,15 @@ class Event(persistent.Persistent):
         self.yyyymm = yyyymm
         self.events = PersistentList([message])
 
+class LoginHistory(persistent.Persistent):
+    def __init__(self, email, password, ip_address):
+        self.time = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
+        self.ip_address = ip_address
+
 root.students = BTree()
 root.assignments = BTree()
 root.events = BTree()
+root.login_history = BTree()
 
 app = FastAPI()
 
@@ -84,11 +90,15 @@ async def login(request: Request):
 
 @app.post("/login", response_class=HTMLResponse)
 async def login(request: Request, email: str = Form(...), password: str = Form(...)):
-    students = root.students
-    if email in students and students[email].password == hash_password(password):
-        yyyymm = datetime.now().strftime("%Y-%m")
-        return RedirectResponse(url=f"/{email}/main/{yyyymm}", status_code=HTTP_302_FOUND)
-    return templates.TemplateResponse("error.html", {"request": request, "error": "Incorrect login"})
+	students = root.students
+	if email in students and students[email].password == hash_password(password):
+		yyyymm = datetime.now().strftime("%Y%m")
+		ip_address = request.client.host
+		root.login_history[email] = LoginHistory(email, password, ip_address)
+		transaction.commit()
+		return RedirectResponse(url=f"/{email}/main/{yyyymm}", status_code=HTTP_302_FOUND)
+	return templates.TemplateResponse("error.html", {"request": request, "error": "Incorrect login"})
+
 
 def is_logged_in(email: str = None):
     if email not in root.students:
@@ -175,14 +185,24 @@ async def admin_login(request: Request, password: str = Form(...)):
 		students = {email: student.__dict__ for email, student in root.students.items()}
 		assignments = {name: assignment.__dict__ for name, assignment in root.assignments.items()}
 		events = {yyyymm: event.__dict__ for yyyymm, event in root.events.items()}
+		logs = {email: log.__dict__ for email, log in root.login_history.items()}
+		
 		data = {
 			"Students": students,
 			"Assignments": assignments,
-			"Event" : events
+			"Event" : events,
+			"Logs": logs
 		}
 		return templates.TemplateResponse("admin_page.html", {"request": request, "data": data})
 	else:
 		return templates.TemplateResponse("error.html", {"request": request, "error": "Incorrect password"})
+
+@app.post("/admin/log", response_class=HTMLResponse)
+async def admin_log(request: Request, email: str = Form(...)):
+	if email not in root.students:
+		return templates.TemplateResponse("error.html", {"request": request, "error": "Invalid email"})
+	logs = [log.__dict__ for log in root.login_history if log.email == email]
+	return templates.TemplateResponse("admin_log.html", {"request": request, "logs": logs})
 
 @app.post("/admin_action", response_class=HTMLResponse)
 async def admin_action(request: Request, action: str = Form(...), key: str = Form(...), value: str = Form(...)):
