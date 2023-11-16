@@ -154,6 +154,17 @@
             #log-out:active {
                 color: red;
             }
+
+			@keyframes slideLeft {
+				0% {transform: translateX(-800px);}
+				100% {transform: translateX(0px);}
+			}
+
+			@keyframes slideRight {
+				0% {transform: translateX(800px);}
+				100% {transform: translateX(0px);}
+			}
+
         </style>
     </head>
     <body onload="on_load()">
@@ -270,6 +281,7 @@
                 shownMonth = shownMonth < 10 ? `0${shownMonth}` : `${shownMonth}`;
                 yyyymm = `${shownYear}-${shownMonth}`;
                 let path = window.location.href.substring(0, window.location.href.lastIndexOf('/'));
+				document.querySelector('body').style.animation = 'slideRight 0.8s ease-in-out';
                 window.location.href = `/{{ email }}/main/${yyyymm}`;
             }
 
@@ -284,6 +296,7 @@
                 shownMonth = shownMonth < 10 ? `0${shownMonth}` : `${shownMonth}`;
                 yyyymm = `${shownYear}-${shownMonth}`;
                 let path = window.location.href.substring(0, window.location.href.lastIndexOf('/'));
+				document.querySelector('body').style.animation = 'slideLeft 0.8s ease-in-out';
                 window.location.href = `/{{ email }}/main/${yyyymm}`;
             }
 
@@ -329,7 +342,6 @@
 			function on_load() {
 				if ("{{ visual }}" == 'dark_mode') {
 					document.querySelector('body').style.backgroundColor = '#333';
-					
 					document.querySelector('table').style.backgroundColor = '#333';
 					document.querySelector('table').style.color = '#f4f4f4';
 					document.querySelector('table').style.border = '5px solid #f4f4f4';
@@ -349,8 +361,6 @@
 					document.querySelector('div.list-box').style.boxShadow = '0 0 10px rgba(255, 255, 255, 0.684)';
 					document.querySelector('div.list-box').style.borderColor = '#f4f4f4';
 
-
-					
 				}
 			}
 
