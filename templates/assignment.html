@@ -163,7 +163,7 @@
                     </li>
                 {% endfor %}
             </ul>
-            {% if can_edit %}
+			{% if can_edit == True %}
                 <button id="openModal">Add Assignment</button>
                 <div id="myModal" class="modal">
                     <div class="modal-content">
@@ -187,8 +187,8 @@
                         </form>
                     </div>
                 </div>
-            {% endif %}
-        </div>
+    	    </div>
+			{% endif %}
         <script>
             let date = "{{ date }}";
             let formatted_date = new Date(date).toLocaleDateString("en-US", {day: "numeric", month: "long", year: "numeric"});
