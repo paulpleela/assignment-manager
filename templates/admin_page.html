@@ -108,6 +108,12 @@
         </li>
     {% endfor %}
     </ul>
+
+	<form action="/purge_database" method="get" onsubmit="return confirm('Are you sure you want to purge the database? This cannot be undone.');">
+		<input type="submit" value="Purge Database">
+	</form>
+	
+	
 </body>
 <script>
 	window.addEventListener('load', (event) => {
