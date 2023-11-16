@@ -310,7 +310,7 @@
             
             <!-- space -->
             <div class="space"></div>
-			
+
 			<!-- re -->
 			<div id="reply-indicator">RE: <span id="reply-user"></span></div>
 			<button id="close-reply-indicator">✖</button>
@@ -322,7 +322,7 @@
 				<textarea id="comment" name="comment"></textarea>
 			
 				<!-- File Upload -->
-				<input type="file" id="file" name="file">
+				<input type="file" id="file-upload" name="file">
 			
 				<button id = "submit" type="submit">➜</button>
 			</form>
@@ -396,33 +396,33 @@
                 }
             })
 
-		// 	document.getElementById('post-form').addEventListener('submit', function (event) {
-		// 	event.preventDefault(); // Prevent the default form submission
+			document.getElementById('post-form').addEventListener('submit', function (event) {
+			event.preventDefault(); // Prevent the default form submission
 
-		// 	if (checkField()) {
-		// 		const formData = new FormData();
-		// 		formData.append('comment', document.getElementById('comment').value);
-		// 		formData.append('reply_user', document.getElementById('reply-field').value);
-		// 		formData.append('file', document.getElementById('file').files[0]);
+			if (checkField()) {
+				const formData = new FormData();
+				formData.append('comment', document.getElementById('comment').value);
+				formData.append('reply_user', document.getElementById('reply-field').value);
+				formData.append('file', document.getElementById('file').files[0]);
 
-		// 		fetch('/uploadfile/', {
-		// 			method: 'POST',
-		// 			body: formData,
-		// 		})
-		// 		.then(response => response.json())
-		// 		.then(data => {
-		// 			// Handle the response from the server if needed
-		// 			console.log(data);
+				fetch('/uploadfile/', {
+					method: 'POST',
+					body: formData,
+				})
+				.then(response => response.json())
+				.then(data => {
+					// Handle the response from the server if needed
+					console.log(data);
 
-		// 			// Manually submit the form after file upload is complete
-		// 			document.getElementById('post-form').submit();
-		// 		})
-		// 		.catch(error => {
-		// 			// Handle any errors that occurred during the fetch
-		// 			console.error('Error:', error);
-		// 		});
-		// 	}
-		// });
+					// Manually submit the form after file upload is complete
+					document.getElementById('post-form').submit();
+				})
+				.catch(error => {
+					// Handle any errors that occurred during the fetch
+					console.error('Error:', error);
+				});
+			}
+		});
 
             function checkField() {
                 let commentField = document.getElementById("comment").value;
@@ -430,8 +430,8 @@
                     alert("Please fill out the message field to post.");
                     return false;
                 }
-				if (document.getElementById("file").value != "") {
-					let file = document.getElementById("file").files[0];
+				if (document.getElementById("file-upload").value != "") {
+					let file = document.getElementById("file-upload").files[0];
 					if (file.size > 10000000) {
 						alert("File size must not exceed 10MB!");
 						return false;
