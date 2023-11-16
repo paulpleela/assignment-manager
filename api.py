@@ -1,6 +1,7 @@
 from fastapi import FastAPI, Request, Form, HTTPException, Depends, Body, File, UploadFile
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import HTMLResponse, RedirectResponse, FileResponse
+from fastapi.staticfiles import StaticFiles
 from starlette.status import HTTP_303_SEE_OTHER
 from datetime import datetime
 import hashlib
@@ -26,18 +27,19 @@ class Assignment(persistent.Persistent):
         self.forum = BTree()
         self.posted_by = posted_by
     
-    def add_message(self, comment, user, reply_user=None):
+    def add_message(self, comment, user, reply_user=None, filename=None):
         time = datetime.now().strftime("%d/%m/%Y %H:%M:%S.%f")[:-3]
-        new_message = Message(comment, user, time, reply_user)
+        new_message = Message(comment, user, time, reply_user, filename)
         self.forum[time] = new_message
 
 
 class Message(persistent.Persistent):
-    def __init__(self, comment, user, time, reply_user=None):
+    def __init__(self, comment, user, time, reply_user=None, filename=None):
         self.reply_user = reply_user
         self.comment = comment
         self.user = user
         self.time = time
+        self.filename = filename
 
 
 class Student(persistent.Persistent):
@@ -74,6 +76,7 @@ if not hasattr(root, 'visual'):
 app = FastAPI()
 
 templates = Jinja2Templates(directory="templates")
+app.mount("/static", StaticFiles(directory="static"), name="static")
 
 def hash_password(password: str):
     return hashlib.sha256(password.encode()).hexdigest()
@@ -174,22 +177,17 @@ async def get_assignment(request: Request, date: str, assignment_index: int, ema
     return templates.TemplateResponse("forum.html", {"request": request, "email": email, "assignments": assignments,  "date": date, "assignment": assignment_obj})
 
 @app.post("/{email}/assignments/{date}/{assignment_index}", response_class=HTMLResponse)
-async def add_forum_msg(request: Request, date: str, assignment_index: int, email: str = Depends(is_logged_in), reply_user: str = Form(None), comment: str = Form(...)):
+async def add_forum_msg(request: Request, date: str, assignment_index: int, email: str = Depends(is_logged_in), reply_user: str = Form(None), comment: str = Form(...), file: UploadFile = File(None)):
+    if file:
+        filename = str(uuid.uuid4()) + file.filename
+        unique_filename = "./static/" + filename
+        with open(unique_filename, "wb") as buffer:
+            buffer.write(await file.read())
+    
     assignment_obj = root.assignments[date][assignment_index]
-    assignment_obj.add_message(comment, email, reply_user)
+    assignment_obj.add_message(comment, email, reply_user, filename)
     transaction.commit()
     return RedirectResponse(url=f"/{email}/assignments/{date}/{assignment_index}", status_code=HTTP_303_SEE_OTHER)
-
-@app.post("/uploadfile/")
-async def create_upload_file(file: UploadFile = File(...)):
-    unique_filename = "./static/" + str(uuid.uuid4()) + "_" + file.filename
-    with open(unique_filename, "wb") as buffer:
-        buffer.write(await file.read())
-    return {"filename": unique_filename}
-
-@app.get("/downloadfile/{filename}")
-async def main(filename: str):
-    return FileResponse("./static/" + filename)
 
 @app.post("/visual")
 async def visual(request: Request):

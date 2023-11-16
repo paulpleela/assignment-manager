@@ -301,6 +301,9 @@
                                 <p>RE : {{ message.reply_user }}</p>
                             {% endif %}
                             <div>{{ message.comment }}</div>
+                            {% if message.filename %}
+                                <a href="/static/{{ message.filename }}" download>Download file</a>
+                            {% endif %}
                             <span id="time">{{ message.time }}</span>
                         </td>
                     </tr>
@@ -395,34 +398,6 @@
                     document.getElementById("close-reply-indicator").style.display = "none" ;
                 }
             })
-
-			document.getElementById('post-form').addEventListener('submit', function (event) {
-			event.preventDefault(); // Prevent the default form submission
-
-			if (checkField()) {
-				const formData = new FormData();
-				formData.append('comment', document.getElementById('comment').value);
-				formData.append('reply_user', document.getElementById('reply-field').value);
-				formData.append('file', document.getElementById('file').files[0]);
-
-				fetch('/uploadfile/', {
-					method: 'POST',
-					body: formData,
-				})
-				.then(response => response.json())
-				.then(data => {
-					// Handle the response from the server if needed
-					console.log(data);
-
-					// Manually submit the form after file upload is complete
-					document.getElementById('post-form').submit();
-				})
-				.catch(error => {
-					// Handle any errors that occurred during the fetch
-					console.error('Error:', error);
-				});
-			}
-		});
 
             function checkField() {
                 let commentField = document.getElementById("comment").value;
