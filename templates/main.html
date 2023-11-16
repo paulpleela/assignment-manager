@@ -320,11 +320,10 @@
                 window.location.href = `/logout`;
             }
 
-			function resolveDelete(event)
+			function resolveDelete(index)
 			{
-			fetch (`/delete_event/{{ yyyymm }}/${event}`, {method: 'POST'})
-				//.then(() => location.reload());	
-				
+			fetch (`/delete_event/{{ yyyymm }}/${index}`, {method: 'DELETE'})
+				.then(() => location.reload());
 			}
 
 			function on_load() {

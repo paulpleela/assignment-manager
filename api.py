@@ -127,7 +127,7 @@ async def get_by_month(request: Request, yyyymm: str, email: str = Depends(is_lo
     if yyyymm in root.events:
         events = root.events[yyyymm].events
     else:
-        events = ["No upcoming events this month."]
+        events = []
 
     assignment_days = []
     for date, assignments_list in root.assignments.items():
@@ -209,11 +209,12 @@ async def logout(request: Request):
 	return RedirectResponse(url=f"/login", status_code=HTTP_303_SEE_OTHER)
 
 #delete event
-@app.get("/delete_event/{yyyymm}/{index}")
+@app.delete("/delete_event/{yyyymm}/{index}")
 async def delete_event(request: Request, yyyymm: str, index: int):
-	del root.events[yyyymm].events[index]
-	transaction.commit()
-	return RedirectResponse(url=f"/{email}/main/{yyyymm}", status_code=HTTP_303_SEE_OTHER)
+    del root.events[yyyymm].events[index]
+    transaction.commit()
+    return RedirectResponse(url=f"/{email}/main/{yyyymm}", status_code=HTTP_303_SEE_OTHER)
+
 
 @app.get("/admin", response_class=HTMLResponse)
 async def admin_login(request: Request):
