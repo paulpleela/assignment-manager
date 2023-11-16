@@ -65,6 +65,8 @@
                 background-color: #d3d3d3;
                 padding: 10px;
                 padding-left: 20px;
+                overflow: auto;
+                word-wrap: break-word;
             }
 
             li {
@@ -122,8 +124,8 @@
         <script>
             let now = new Date();
             let yyyymm = "{{ yyyymm }}";
-            let shownYear = parseInt(yyyymm.substring(0, 4), 10);
-            let shownMonth = parseInt(yyyymm.substring(4, 6), 10);
+            let shownYear = parseInt(yyyymm.slice(0, 4));
+            let shownMonth = parseInt(yyyymm.slice(5, 7));
             let assignment_days = {{ assignment_days }};
 
             const yearHeader = document.getElementById("year-header");
@@ -151,15 +153,13 @@
                             }
                             if (assignment_days.includes(date)) {
                                 newDate.classList.add("flag");
+                                newDate.addEventListener("click", (function(date, shownMonth, shownYear) {
+                                    return function() {
+                                        let clickedDate = date < 10 ? `0${date}` : `${date}`;
+                                        window.location.href = `/{{ email }}/assignments/${yyyymm}-${clickedDate}`;
+                                    };
+                                })(date, shownMonth, shownYear));
                             }
-                            newDate.addEventListener("click", (function(date, shownMonth, shownYear) {
-                                return function() {
-                                    let clickedDate = date < 10 ? `0${date}` : `${date}`;
-                                    let clickedMonth = shownMonth < 10 ? `0${shownMonth}` : `${shownMonth}`;
-                                    let clickedYear = shownYear;
-                                    window.location.href = `/{{email}}/assignments/${clickedDate}${clickedMonth}${clickedYear}`;
-                                };
-                            })(date, shownMonth, shownYear));
                             date++;
                         }
                         newWeek.appendChild(newDate);
@@ -178,9 +178,9 @@
                     shownYear--;
                 }
                 shownMonth = shownMonth < 10 ? `0${shownMonth}` : `${shownMonth}`;
-                yyyymm = `${shownYear}${shownMonth}`;
+                yyyymm = `${shownYear}-${shownMonth}`;
                 let path = window.location.href.substring(0, window.location.href.lastIndexOf('/'));
-                window.location.href = `/{{email}}/main/${yyyymm}`;
+                window.location.href = `/{{ email }}/main/${yyyymm}`;
             }
 
             function nextMonth() {
@@ -192,9 +192,9 @@
                     shownYear++;
                 }
                 shownMonth = shownMonth < 10 ? `0${shownMonth}` : `${shownMonth}`;
-                yyyymm = `${shownYear}${shownMonth}`;
+                yyyymm = `${shownYear}-${shownMonth}`;
                 let path = window.location.href.substring(0, window.location.href.lastIndexOf('/'));
-                window.location.href = `/{{email}}/main/${yyyymm}`;
+                window.location.href = `/{{ email }}/main/${yyyymm}`;
             }
         </script>
     </body>

@@ -1,0 +1,356 @@
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Assignments</title>
+        <style>
+            body {
+                font-family: Arial, sans-serif;
+                margin: 0;
+                padding: 0;
+                display: flex;
+            }
+
+            div.sidebar{
+                height: 100%;
+                background-color: #007BFF;
+                min-width: 290px;
+                width : 290px;
+                direction: rtl;
+                overflow-y: auto;
+                overflow-x: hidden;
+            }
+
+            div.content{
+                flex: 1;
+                width: 100%;
+                background-color: white;
+                height: 100%;
+                color: black;
+                display: flex;
+                flex-direction: column;
+                overflow-x: hidden;
+            }
+
+            li.assignment-button {
+                padding: 10px;
+                margin: 15px;
+                border-radius: 10px;
+                text-transform: uppercase;
+                text-align: center;
+                word-wrap: break-word;
+                max-width: 100%;
+                border-radius: 20px;
+                background-color: #9ccbfe;
+                border: 3px solid black;
+            }
+
+            div.assignment-name {
+                font-size: 18px;
+                pointer-events: none;
+            }
+
+            div.assignment-subject {
+                font-size: 14px;
+                font-weight: bold;
+                pointer-events: none;
+            }
+
+            ul#assignments-list {
+                list-style: none; 
+                margin: 0;
+                padding: 0;
+            }
+
+            .sidebar-button {
+                background-color: #007BFF;
+                border: 0;
+                color: #ffffff;
+                font-size: 30px;
+                font-weight: bold;
+                display: flex;
+                align-items: flex-start;
+                flex-direction: column;
+            }
+
+            .display-date {
+                padding-right: 10px ;
+                flex: 1;
+                writing-mode: vertical-lr;
+                text-align: center;
+                font-size: 20px;
+                transform: rotate(180deg);
+            }
+
+            h1#assignment-name {
+                padding-top: 20px;
+                font-size: 30px;
+                text-align: center;
+                text-transform: uppercase;
+            }
+
+            #assignment-detail{
+                font-size: 20px;
+                padding-left: 20px;
+                padding-right: 20px;
+                text-align: justify;
+                white-space: pre-wrap;
+            }
+
+            #due{
+                color: rgb(166, 36, 36);
+                font-size: 28px;
+            }
+
+            #pic{
+                vertical-align: top;
+                font-size: 18px;
+                padding-right: 20px;
+            }
+
+            img{
+                width : 60px;
+                height : 60px ;
+                border-radius: 25%;
+            }
+
+            table#forum{
+                text-align: left;
+                padding-bottom: 15px;
+                overflow-x: hidden;
+                box-sizing: border-box;
+                margin: 30px;
+            }
+
+            #cmt-box{
+                border: 2px solid black;
+                border-radius: 20px;
+                padding: 15px;
+                overflow-y: auto;
+                word-wrap: break-word;
+                background-color: #b6d9ff;
+            }
+
+            #cmt-box p{
+                color: red;
+            }
+
+            #cmt-box , #username{
+                font-size: 18px;
+            }
+
+            #time{
+                font-size: 15px;
+                text-align: right;
+                display: block;
+            }
+
+            #submit{
+                cursor: pointer;
+
+                transition: .2s;
+
+                position: fixed;
+                bottom: 25px;
+                right : 20px ;
+                background-color: #b6d9ff;
+
+                border-radius: 50%;
+                border: 2px solid black;
+                align-items: center;
+                justify-content: center;
+
+                font-size: 30px;
+
+                width : 50px ;
+                height: 50px;
+                transform: rotate(270deg);
+                padding-bottom: 4px;
+            }
+
+            #submit:hover{
+                background-color: #007BFF;
+                color: white;
+            }
+
+            .space{
+                padding-bottom: 100px;
+                background-color: white;
+            }
+
+            textarea {
+                font-size:  25px;
+                font-family: Mali;
+
+                width : 60vw;
+                height: 40px;
+
+                border-radius: 10px;
+
+                position: fixed;
+
+                bottom: 30px;
+                left: 32vw;
+
+                resize: none;
+            }
+
+            #username{
+                cursor: pointer;
+            }
+
+            #reply-indicator {
+
+                display: none;
+                position: fixed;
+
+                bottom: 70px;
+                left: 33vw;
+
+                background-color: #d6d6d6;
+                border-radius: 10px  10px 0px 0px;
+                padding: 5px;
+            }
+
+            #close-reply-indicator{
+                display: none;
+                cursor: pointer;
+
+                width: 20px;
+                height: 20px;
+
+                background-color: #d6d6d6;
+                border: 1px solid black;
+                border-radius: 50%;
+
+                position: fixed;
+
+                bottom: 85px;
+                left: 32vw;
+
+                font-size: 13px;
+                line-height: 15px;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="sidebar" id="sidebar">
+            <ul id="assignments-list">
+                {% for assignment in assignments %}
+                    <li class="assignment-button" data-assignment-index="{{ loop.index0 }}">
+                        <div class="assignment-subject">{{ assignment.subject }}</div>
+                        <div class="assignment-name">{{ assignment.name }}</div>
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+        <div class="sidebar-button">
+            <button id="sidebar-button" class="sidebar-button" onclick="toggleSidebar()">&#x2716;</button>
+            <div class="display-date" id="display-date"></div>
+        </div>
+        <div class="content">
+            <h1 id="assignment-name">{{ assignment.subject }}: {{ assignment.name }}</h1>
+            <p id="assignment-detail">{{ assignment.content }}</p>
+            <table id="forum">
+                {% for message in assignment.forum.values() %}
+                    <tr>
+                        <td id="username">{{ message.user }}</td>
+                    </tr>
+                    <tr>
+                        <td id="cmt-box">
+                            {% if message.reply_user %}
+                                <p>RE : {{ message.reply_user }}</p>
+                            {% endif %}
+                            <div>{{ message.comment }}</div>
+                            <span id="time">{{ message.time }}</span>
+                        </td>
+                    </tr>
+                    <tr style="height: 15px;"></tr>
+                {% endfor %}
+            </table>
+            
+            <!-- space -->
+            <div class="space"></div>
+            <form id="textmessage" onsubmit="return checkField()" method="post">
+            <!-- re -->
+                <div id="reply-indicator">RE: <span id="reply-user"></span></div>
+                <button id="close-reply-indicator">&#x2716;</button>
+
+            <!-- Text mesage -->
+                <input type="hidden" id="reply-field" name="reply_user">
+                <textarea id="comment" name="comment"></textarea>
+                <button id = "submit" type="submit">&#10140;</button>
+            </form>
+        </div>
+        <script>
+            let date = "{{ date }}";
+            let formatted_date = new Date(date).toLocaleDateString("en-US", {day: "numeric", month: "long", year: "numeric"});
+            const display_date = document.getElementById("display-date");
+            display_date.textContent = formatted_date;
+
+            const sidebar = document.getElementById("sidebar");
+            const sidebar_button = document.getElementById("sidebar-button");
+            let sidebar_displayed = true;
+            function toggleSidebar() {
+                if (sidebar_displayed) {
+                    sidebar.style.minWidth = "0px";
+                    sidebar.style.width = "0px";
+                    sidebar_button.innerHTML = "&#x2630";
+                }
+                else {
+                    sidebar.style.minWidth = "290px";
+                    sidebar.style.width = "290px";
+                    sidebar_button.innerHTML = "&#x2716";
+                }
+                sidebar_displayed = !sidebar_displayed;
+            }
+            toggleSidebar();
+
+            window.addEventListener('resize', function(){
+                if (window.innerWidth < 800) {
+                    if (sidebar_displayed) {
+                        sidebar.style.minWidth = "0px";
+                        sidebar.style.width = "0px";
+                        sidebar_button.innerHTML = "&#x2630";
+                        sidebar_displayed = false;
+                    }
+                }
+            });
+            
+            document.getElementById("assignments-list").addEventListener('click', function(event) {
+                if (event.target.classList.contains("assignment-button")) {
+                    const index = parseInt(event.target.getAttribute("data-assignment-index"), 10);
+                    window.location.href = `/{{ email }}/assignments/{{ date }}/${index}`;
+                }
+            })
+
+            window.addEventListener('click' , function(e){
+                let event = e.target.getAttribute("id") ;
+                let reply_indicator = document.getElementById("reply-indicator") ;
+                let reply_user = document.getElementById("reply-user") ;
+                //click other's username for remessaging
+                if(event == "username"){
+                    reply_user.innerHTML = e.target.textContent;
+                    document.getElementById("reply-field").value = reply_user.innerHTML;
+                    reply_indicator.style.display = "block" ;
+                    document.getElementById("close-reply-indicator").style.display = "block" ;
+                }
+                //close remessaging
+                if(event == "close-reply-indicator"){
+                    document.getElementById("reply-field").value = null;
+                    document.getElementById("reply-indicator").style.display = "none" ;
+                    document.getElementById("close-reply-indicator").style.display = "none" ;
+                }
+            })
+
+            function checkField() {
+                let commentField = document.getElementById("comment").value;
+                if (commentField.trim() == "") {
+                    alert("Please fill out the message field to post.");
+                    return false;
+                }
+                return true;
+            }
+        </script>
+    </body>
+</html>

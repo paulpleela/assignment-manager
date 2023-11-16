@@ -1,228 +1,115 @@
-
 <html>
-<head>
-<style>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Assignments</title>
+        <style>
+            body {
+                    font-family: Arial, sans-serif;
+                    background-color: white;
+                    margin: 0;
+                    padding: 0;
+                    display: flex;
+                    flex-direction: row;
+                }
 
+            div.header{
+                pointer-events: none;
+                background-color: #007BFF;
+                color: #f4f4f4;
 
-	body {
-			font-family: Mali;
-			background-color: #f4f4f4;
-			margin: 0;
-			padding: 0;
-		}
+                writing-mode: vertical-lr;
+                width : 10vw ;
+                text-align: center;
+                font-size: calc(min(5vw, 10vh, 50px));
 
-    div.header{
-        pointer-events: none;
+                transform: rotate(180deg);
 
-        padding-left: 10px ;
-        height: 100%;
-        background-color: #007BFF;
-        color: #f4f4f4;
+                border-right: 1px solid #494949;
+                padding-right: 2vw;
+            }
 
-        writing-mode: vertical-lr;
-        position: fixed;
-        width : 250px ;
-        text-align: center;
-        font-size: 50px;
+            div.content{
+                flex: 1;
+                background-color: white;
+                color: black;
+                text-align : center;
+                overflow-y: auto;
+            }
 
-        transform: rotate(180deg);
+            div.topic{
+                pointer-events: none;
 
-        border-right: 1px solid #494949;
-    }
+                font-size: 50px;
+                padding-top: 30px;
+                padding-bottom: 30px;
+                border-bottom: 5px solid rgb(0, 0, 0);
+                margin: 50px;
+                margin-top: 0px;
+            }
 
-	table{
-        width: 100%;
-        
-    }
+            ul#assignments-list {
+                list-style: none; 
+                margin: 0;
+                padding: 0;
+                padding-bottom: 5px;
+            }
 
-	td {
-        vertical-align: top;
-        height: 70px;
-        padding-left: 30px;
-		color: black;
-        font-size: 25px;
-    }
+            
+            li.assignment-button {
+                padding: 10px;
+                text-transform: uppercase;
+                text-align: center;
+                word-wrap: break-word;
+                background-color: #9ccbfe;
+                border: 5px solid black;
+                min-height: 60px;
+                margin: 8vw;
+                margin-top: 0px;
+                margin-bottom: 10px;
+                border-radius: 20px;
+                width: 70vw;
+            }
 
-	textarea{
-        resize: none;
-        font-size: 20px;
-        width: 90%;
-        border-radius: 10px;
-        font-family: Mali;
-		height: 150px;
-    }
+            .assignment-name {
+                font-size: 25px;
+                pointer-events: none;
+            }
 
-    select , input {
-        font-size:  30px;
-        font-family: Mali;
-        width : 90% ;
-        border-radius: 10px;
-    }
+            .assignment-subject {
+                font-size: 22px;
+                font-weight: bold;
+                pointer-events: none;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="header">
+            <p id = "display-date"></p>
+        </div>
+        <div class="content">
+            <div class="topic">Assignments</div>
+            <ul id="assignments-list">
+                {% for assignment in assignments %}
+                    <li class="assignment-button" data-assignment-index="{{ loop.index0 }}">
+                        <div class="assignment-subject">{{ assignment.subject }}</div>
+                        <div class="assignment-name">{{ assignment.name }}</div>
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+        <script>
+            let date = "{{ date }}";
+            let formatted_date = new Date(date).toLocaleDateString("en-US", {day: "numeric", month: "long", year: "numeric"});
+            const display_date = document.getElementById("display-date");
+            display_date.textContent = formatted_date;
 
-    div.content{
-        margin-left : 260px ;
-        background-color: white;
-        height: 100%;
-        color: black;
-        font-size: 25px;
-        text-align : center ;
-    }
-
-    div.topic{
-        pointer-events: none;
-
-        font-size: 50px;
-        padding-top: 40px;
-        padding-bottom: 40px;
-        border-bottom: 5px solid rgb(0, 0, 0);
-        margin: 50px;
-        margin-top: 0px;
-    }
-
-    div#list p{
-        display: flex;
-        justify-content: center;
-        align-items: center;
-
-        height: 100px;
-        margin: 100px;
-        margin-top: 0px;
-        margin-bottom: 10px;
-        border-radius: 20px;
-
-        background-color: #9ccbfe;
-        border: 5px solid rgb(0, 0, 0);
-    }
-
-    div#click{
-        padding-top: 50px;
-        font-size: 30px ;
-        text-decoration: underline;
-    }
-
-	.modal {
-    display: none;
-	
-	}
-
-	.close{
-		display: flex;
-		transition: .2s;
-		cursor: pointer;
-		font-size: 50px;
-		width: fit-content;
-		height: fit-content;
-	}
-
-	.close:hover{
-		color: red;
-	}
-
-	#submit , #openModal{
-        font-family: Mali;
-        font-size: 25px;
-        cursor: pointer;
-        background-color: #9ccbfe;
-        border-radius: 20px;
-
-        align-items: center;
-        justify-content: center;
-        display: flex;
-
-        position: absolute;
-        margin-top: 50px;
-        left: 50%;
-
-        transition: .2s;
-
-		width: fit-content;
-
-    }
-
-    #submit:hover , #openModal:hover , .close:hover{
-        transform: scale(1.1 , 1.1);
-    }
-
-
-</style>
-</head>
-
-<body>
-    <div class="header">
-        <p id = "dmy">{{ date }}</p>
-    </div>
-    <div class="content">
-        <div class="topic">Assignments</div>
-        <div id="list">
-            <!-- Assignments will be dynamically loaded here -->
-        </div> 
-  
-
-    </div>
-</body>
-<script>
-	let today = new Date();
-	let dd = String(today.getDate()).padStart(2, '0');
-	let mm = String(today.getMonth() + 1).padStart(2, '0'); //Starting from jan
-	let yyyy = today.getFullYear();
-	let date = dd + mm + yyyy;
-
-	fetch('/assignments/' + date)
-		.then(response => {
-			if (!response.ok) {
-				// If the server returns an error, reload the page
-				//location.reload();
-				throw new Error('No assignments found for this date');
-			}
-			return response.json();
-		})
-		.then(data => {
-			// Update date
-			document.getElementById("day").innerHTML = data.day;
-			document.getElementById("dmy").innerHTML = data.date[1] + " " + data.month + " " + data.year;
-
-			// Load assignments
-			let list = document.getElementById("list");
-			list.innerHTML = '';
-			for(let item of data.list){
-				let p = document.createElement('p');
-				p.textContent = item.name + ":::" + item.subject;
-				list.appendChild(p);
-			}
-		})
-		.catch(error => console.error(error));
-
-
-		document.getElementById('addAssignmentForm').addEventListener('submit', function(event) {
-		event.preventDefault();
-		var name = document.getElementById('name').value;
-		var subject = document.getElementById('subject').value;
-		var due_date = document.getElementById('due_date').value;
-		var detail = document.getElementById('detail').value;
-
-		fetch('/add_assignment', {
-			method: 'POST',
-			headers: {
-			'Content-Type': 'application/json',
-			},
-			body: JSON.stringify({
-			name: name,
-			subject: subject,
-			due_date: due_date,
-			detail: detail
-			}),
-		})
-		.then(response => response.json())
-		.then(data => {
-			modal.style.display = "none";
-			loadAssignments();
-		})
-		.catch((error) => {
-			console.error('Error:', error);
-		});
-		});
-
-
-
-</script>
+            document.getElementById("assignments-list").addEventListener('click', function(event) {
+                if (event.target.classList.contains("assignment-button")) {
+                    const index = parseInt(event.target.getAttribute("data-assignment-index"), 10);
+                    window.location.href = `/{{ email }}/assignments/{{ date }}/${index}`;
+                }
+            })
+        </script>
+    </body>
 </html>
