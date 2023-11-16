@@ -18,12 +18,13 @@ connection = db.open()
 root = connection.root
 
 class Assignment(persistent.Persistent):
-    def __init__(self, name, subject, due_date, content):
+    def __init__(self, name, subject, due_date, content, posted_by):
         self.name = name
         self.subject = subject
         self.due_date = due_date
         self.content = content
         self.forum = BTree()
+        self.posted_by = posted_by
     
     def add_message(self, comment, user, reply_user=None):
         time = datetime.now().strftime("%d/%m/%Y %H:%M:%S.%f")[:-3]
@@ -126,6 +127,20 @@ async def get_assignments(request: Request, date: str, email: str = Depends(is_l
             assignments.append({"subject": assignment.subject, "name": assignment.name})
     return templates.TemplateResponse("assignment.html", {"request": request, "email": email, "assignments": assignments, "date": date})
 
+@app.post("/{email}/assignments/{date}", response_class=HTMLResponse)
+async def add_assignment(request: Request, date: str, assignment_name: str = Form(...), subject: str = Form(...), content: str = Form(...), email: str = Depends(is_logged_in)):
+    can_edit = root.students[email].edit
+    if date not in root.assignments:
+        root.assignments[date] = PersistentList()
+    new_assignment = Assignment(assignment_name, subject, date, content, email)
+    root.assignments[date].append(new_assignment)
+    transaction.commit()
+
+    assignments = []
+    for assignment in root.assignments[date]:
+        assignments.append({"subject": assignment.subject, "name": assignment.name})
+    return templates.TemplateResponse("assignment.html", {"request": request, "email": email, "assignments": assignments, "date": date, "can_edit": can_edit})
+
 @app.get("/{email}/assignments/{date}/{assignment_index}", response_class=HTMLResponse)
 async def get_assignment(request: Request, date: str, assignment_index: int, email: str = Depends(is_logged_in)):
     assignments = []
@@ -146,30 +161,6 @@ async def add_forum_msg(request: Request, date: str, assignment_index: int, emai
     assignment_obj.add_message(comment, email, reply_user)
     transaction.commit()
     return templates.TemplateResponse("forum.html", {"request": request, "email": email, "assignments": assignments,  "date": date, "assignment": assignment_obj})
-
-@app.get("/admin/add_assignment", response_class=HTMLResponse)
-async def add_assignment_form(request: Request):
-    return templates.TemplateResponse("admin_assignment.html", {"request": request})
-
-@app.post("/admin/add_assignment", response_class=HTMLResponse)
-async def add_assignment(request: Request, assignment_name: str = Form(...), subject: str = Form(...), due_date: str = Form(...), content: str = Form(...)):
-    if due_date not in root.assignments:
-        root.assignments[due_date] = PersistentList()
-    new_assignment = Assignment(assignment_name, subject, due_date, content)
-    root.assignments[due_date].append(new_assignment)
-    transaction.commit()
-    success = """
-    <html>
-        <head>
-            <title>Success</title>
-        </head>
-        <body>
-            <h1>Success</h1>
-            <p>Your assignment has been added successfully.</p>
-        </body>
-    </html>
-    """
-    return HTMLResponse(content=success, status_code=HTTP_200_OK)
 
 @app.post("/uploadfile/")
 async def create_upload_file(file: UploadFile = File(...)):
