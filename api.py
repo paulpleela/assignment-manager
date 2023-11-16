@@ -1,7 +1,7 @@
 from fastapi import FastAPI, Request, Form, HTTPException, Depends, Body, File, UploadFile
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import HTMLResponse, RedirectResponse, FileResponse
-from starlette.status import HTTP_302_FOUND, HTTP_303_SEE_OTHER
+from starlette.status import HTTP_302_FOUND, HTTP_303_SEE_OTHER, HTTP_200_OK
 from datetime import datetime
 import hashlib
 import json
@@ -152,22 +152,29 @@ async def add_forum_msg(request: Request, date: str, assignment_index: int, emai
     transaction.commit()
     return templates.TemplateResponse("forum.html", {"request": request, "email": email, "assignments": assignments,  "date": date, "assignment": assignment_obj})
 
-@app.get("/add_assignment", response_class=HTMLResponse)
+@app.get("/admin/add_assignment", response_class=HTMLResponse)
 async def add_assignment_form(request: Request):
     return templates.TemplateResponse("admin_assignment.html", {"request": request})
 
-@app.post("/add_assignment", response_class=HTMLResponse)
-async def add_assignment(request: Request, email: str = Form(...), password: str = Form(...), assignment_name: str = Form(...), subject: str = Form(...), due_date: str = Form(...), content: str = Form(...)):
-    students = root.students
-    if email in students and students[email].password == hash_password(password):
-        if due_date not in root.assignments:
-            root.assignments[due_date] = PersistentList()
-        new_assignment = Assignment(assignment_name, subject, due_date, content)
-        root.assignments[due_date].append(new_assignment)
-        transaction.commit()
-        return RedirectResponse(url=f"/{email}/main/{due_date}", status_code=HTTP_302_FOUND)
-    return templates.TemplateResponse("error.html", {"request": request, "error": "Incorrect login"})
-
+@app.post("/admin/add_assignment", response_class=HTMLResponse)
+async def add_assignment(request: Request, assignment_name: str = Form(...), subject: str = Form(...), due_date: str = Form(...), content: str = Form(...)):
+    if due_date not in root.assignments:
+        root.assignments[due_date] = PersistentList()
+    new_assignment = Assignment(assignment_name, subject, due_date, content)
+    root.assignments[due_date].append(new_assignment)
+    transaction.commit()
+    success = """
+    <html>
+        <head>
+            <title>Success</title>
+        </head>
+        <body>
+            <h1>Success</h1>
+            <p>Your assignment has been added successfully.</p>
+        </body>
+    </html>
+    """
+    return HTMLResponse(content=success, status_code=HTTP_200_OK)
 
 @app.post("/uploadfile/")
 async def create_upload_file(file: UploadFile = File(...)):
