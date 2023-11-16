@@ -156,7 +156,7 @@
             }
         </style>
     </head>
-    <body>
+    <body onload="on_load()">
         <div class="flex-row">
             <div class="header-box">
                 <button class="navigation clickable" onclick="prevMonth()">&lt;</button>
@@ -208,6 +208,7 @@
             </div>
         </div>
         <button id="log-out" onclick="logOut()">&#9664;</button>
+		</body>
         <script>
             let now = new Date();
             let yyyymm = "{{ yyyymm }}";
@@ -317,6 +318,35 @@
             function logOut() {
                 window.location.href = `/logout`;
             }
+
+			function on_load() {
+				console.log("{{ visual }}");
+				if ("{{ visual }}" == 'dark_mode') {
+					document.querySelector('body').style.backgroundColor = '#333';
+					
+					document.querySelector('table').style.backgroundColor = '#333';
+					document.querySelector('table').style.color = '#f4f4f4';
+					document.querySelector('table').style.border = '5px solid #f4f4f4';
+					document.querySelector('table').style.borderRadius = '10px';
+					document.querySelector('table').style.boxShadow = '0 0 10px rgba(255, 255, 255, 0.684)';
+					document.querySelector('table').style.borderColor = '#f4f4f4';
+					document.querySelector('div.header-box').style.backgroundColor = '#333';
+					document.querySelector('div.header-box').style.color = '#f4f4f4';
+					document.querySelector('div.header-box').style.border = '5px solid #f4f4f4';
+					document.querySelector('div.header-box').style.borderRadius = '10px';
+					document.querySelector('div.header-box').style.boxShadow = '0 0 10px rgba(255, 255, 255, 0.684)';
+					document.querySelector('div.header-box').style.borderColor = '#f4f4f4';
+					document.querySelector('div.list-box').style.backgroundColor = '#333';
+					document.querySelector('div.list-box').style.color = '#f4f4f4';
+					document.querySelector('div.list-box').style.border = '5px solid #f4f4f4';
+					document.querySelector('div.list-box').style.borderRadius = '10px';
+					document.querySelector('div.list-box').style.boxShadow = '0 0 10px rgba(255, 255, 255, 0.684)';
+					document.querySelector('div.list-box').style.borderColor = '#f4f4f4';
+
+
+					
+				}
+			}
+
         </script>
-    </body>
 </html>

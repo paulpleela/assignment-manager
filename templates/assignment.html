@@ -160,13 +160,18 @@
                 color: orange;
                 cursor: pointer;
             }
+			
+		 	.dark-mode {
+			 	background-color: #333;
+			 	color: #f4f4f4;
+			}
 
             #go-back:active {
                 color: red;
             }
         </style>
     </head>
-    <body>
+    <body onload="on_load()">
         <div class="header">
             <p id = "display-date"></p>
         </div>
@@ -206,6 +211,7 @@
                 </div>
 			{% endif %}
         <button id="go-back" onclick="goBack()">&#9664;</button>
+	</body>
         <script>
             let date = "{{ date }}";
             let formatted_date = new Date(date).toLocaleDateString("en-US", {day: "numeric", month: "long", year: "numeric"});
@@ -254,6 +260,28 @@
                 let yyyymm = "{{ date }}".slice(0, -3);
                 window.location.href = `/{{ email }}/main/${yyyymm}`;
             }
+
+			function on_load() {
+				if ("{{ visual }}" == 'dark_mode') {
+					document.body.classList.add('dark-mode');
+					document.querySelector('div.header').style.backgroundColor = 'black';
+					document.querySelector('div.header').style.borderRight = '1px solid #f4f4f4';
+					document.querySelector('div.content').style.backgroundColor = '#333';
+					document.querySelector('div.topic').style.borderBottom = '5px solid #f4f4f4';
+					document.querySelector('div.topic').style.color = '#f4f4f4';
+					document.querySelector('div.topic').style.backgroundColor = '#333';
+
+					document.querySelectorAll('li.assignment-button').forEach((assignment_button) => {
+						assignment_button.style.backgroundColor = '#9ccbfe';
+						assignment_button.style.border = '5px solid #f4f4f4';
+					});
+					document.querySelectorAll('td').forEach((td) => {
+						td.style.color = '#f4f4f4';
+					});
+				}
+			}					
+
+
         </script>
-    </body>
+    
 </html>

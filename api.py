@@ -52,10 +52,10 @@ class Event(persistent.Persistent):
         self.events = PersistentList([message])
 
 class LoginHistory(persistent.Persistent):
-	def __init__(self, email, password, ip_address):
+	def __init__(self, email, ip_address):
 		self.time = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
 		self.email = email
-		self.password = password
+		#self.password = password
 		self.ip_address = ip_address
 
 
@@ -105,7 +105,7 @@ async def login(request: Request, email: str = Form(...), password: str = Form(.
 	if email in students and students[email].password == hash_password(password):
 		yyyymm = datetime.now().strftime("%Y-%m")
 		ip_address = request.client.host
-		root.login_history[email] = LoginHistory(email, password, ip_address)
+		root.login_history[email] = LoginHistory(email, ip_address)
 		transaction.commit()
 		return RedirectResponse(url=f"/{email}/main/{yyyymm}", status_code=HTTP_303_SEE_OTHER)
 	return templates.TemplateResponse("error.html", {"request": request, "error": "Incorrect login"})
@@ -128,7 +128,7 @@ async def get_by_month(request: Request, yyyymm: str, email: str = Depends(is_lo
         assignment_yyyymm = date[:7]
         if (assignment_yyyymm == yyyymm and assignments_list):
             assignment_days.append(int(date[-2:]))
-    return templates.TemplateResponse("main.html", {"request": request, "email": email, "events": events, "yyyymm": yyyymm, "assignment_days": assignment_days, "can_edit": can_edit})
+    return templates.TemplateResponse("main.html", {"request": request, "email": email, "events": events, "yyyymm": yyyymm, "assignment_days": assignment_days, "can_edit": can_edit, "visual": root.visual[request.client.host]})
 
 @app.post("/{email}/main/{yyyymm}", response_class=HTMLResponse)
 async def add_event(request: Request, yyyymm: str, content: str = Form(...), email: str = Depends(is_logged_in)):
@@ -147,7 +147,7 @@ async def get_assignments(request: Request, date: str, email: str = Depends(is_l
 	if date in root.assignments:
 		for assignment in root.assignments[date]:
 			assignments.append({"subject": assignment.subject, "name": assignment.name})
-	return templates.TemplateResponse("assignment.html", {"request": request, "email": email, "assignments": assignments, "date": date, "can_edit": can_edit})
+	return templates.TemplateResponse("assignment.html", {"request": request, "email": email, "assignments": assignments, "date": date, "can_edit": can_edit, "visual": root.visual[request.client.host]})
 
 @app.post("/{email}/assignments/{date}", response_class=HTMLResponse)
 async def add_assignment(request: Request, date: str, assignment_name: str = Form(...), subject: str = Form(...), content: str = Form(...), email: str = Depends(is_logged_in)):
