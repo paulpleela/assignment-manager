@@ -9,19 +9,35 @@ import ZODB, ZODB.FileStorage
 from BTrees.OOBTree import BTree
 import transaction
 import persistent
+from persistent.list import PersistentList
 import re
+
 storage = ZODB.FileStorage.FileStorage('database.fs')
 db = ZODB.DB(storage)
 connection = db.open()
 root = connection.root
-from fastapi import Depends
 
 class Assignment(persistent.Persistent):
-    def __init__(self, name, subject, due_date, detail):
+    def __init__(self, name, subject, due_date, content):
         self.name = name
         self.subject = subject
         self.due_date = due_date
-        self.detail = detail
+        self.content = content
+        self.forum = BTree()
+    
+    def add_message(self, comment, user, reply_user=None):
+        time = datetime.now().strftime("%d/%m/%Y %H:%M:%S.%f")[:-3]
+        new_message = Message(comment, user, time, reply_user)
+        self.forum[time] = new_message
+
+
+class Message(persistent.Persistent):
+    def __init__(self, comment, user, time, reply_user=None):
+        self.reply_user = reply_user
+        self.comment = comment
+        self.user = user
+        self.time = time
+
 
 class Student(persistent.Persistent):
 	def __init__(self, email, password, edit):
@@ -32,7 +48,7 @@ class Student(persistent.Persistent):
 class Event(persistent.Persistent):
     def __init__(self, yyyymm, message):
         self.yyyymm = yyyymm
-        self.events = [message]
+        self.events = PersistentList([message])
 
 root.students = BTree()
 root.assignments = BTree()
@@ -41,8 +57,6 @@ root.events = BTree()
 app = FastAPI()
 
 templates = Jinja2Templates(directory="templates")
-
-
 
 def hash_password(password: str):
     return hashlib.sha256(password.encode()).hexdigest()
@@ -72,13 +86,13 @@ async def login(request: Request):
 async def login(request: Request, email: str = Form(...), password: str = Form(...)):
     students = root.students
     if email in students and students[email].password == hash_password(password):
-        yyyymm = datetime.now().strftime("%Y%m")
+        yyyymm = datetime.now().strftime("%Y-%m")
         return RedirectResponse(url=f"/{email}/main/{yyyymm}", status_code=HTTP_302_FOUND)
     return templates.TemplateResponse("error.html", {"request": request, "error": "Incorrect login"})
 
 def is_logged_in(email: str = None):
     if email not in root.students:
-        raise HTTPException(status_code=HTTP_303_SEE_OTHER, detail="/login")
+       raise HTTPException(status_code=HTTP_303_SEE_OTHER, detail="/login")
     return root.students[email].email
 
 @app.get("/{email}/main/{yyyymm}", response_class=HTMLResponse)
@@ -87,38 +101,56 @@ async def get_by_month(request: Request, yyyymm: str, email: str = Depends(is_lo
         events = root.events[yyyymm]
     else:
         events = ["No upcoming events this month."]
-
     assignment_days = []
     for date, assignments_list in root.assignments.items():
-        assignment_yyyymm = date[4:8] + date[2:4]
+        assignment_yyyymm = date[:7]
         if (assignment_yyyymm == yyyymm and assignments_list):
-            assignment_days.append(int(date[:2]))
+            assignment_days.append(int(date[-2:]))
     return templates.TemplateResponse("main.html", {"request": request, "email": email, "events": events, "yyyymm": yyyymm, "assignment_days": assignment_days})
 
 @app.get("/{email}/assignments/{date}", response_class=HTMLResponse)
 async def get_assignments(request: Request, date: str, email: str = Depends(is_logged_in)):
-    date_obj = datetime.strptime(date, "%d%m%Y")
+    assignments = []
     if date in root.assignments:
-        assignments = root.assignments[date]
-    else:
-        assignments = []
-    formatted_date = date_obj.strftime("%d / %B / %Y")
-    return templates.TemplateResponse("assignment.html", {"request": request, "email": email, "assignments": assignments, "date": formatted_date})
+        for assignment in root.assignments[date]:
+            assignments.append({"subject": assignment.subject, "name": assignment.name})
+    return templates.TemplateResponse("assignment.html", {"request": request, "email": email, "assignments": assignments, "date": date})
+
+@app.get("/{email}/assignments/{date}/{assignment_index}", response_class=HTMLResponse)
+async def get_assignment(request: Request, date: str, assignment_index: int, email: str = Depends(is_logged_in)):
+    assignments = []
+    if date in root.assignments:
+        for assignment in root.assignments[date]:
+            assignments.append({"subject": assignment.subject, "name": assignment.name})
+    assignment_obj = root.assignments[date][assignment_index]
+    return templates.TemplateResponse("forum.html", {"request": request, "email": email, "assignments": assignments,  "date": date, "assignment": assignment_obj})
+
+@app.post("/{email}/assignments/{date}/{assignment_index}", response_class=HTMLResponse)
+async def add_forum_msg(request: Request, date: str, assignment_index: int, email: str = Depends(is_logged_in), reply_user: str = Form(None), comment: str = Form(...)):
+    assignments = []
+    if date in root.assignments:
+        for assignment in root.assignments[date]:
+            assignments.append({"subject": assignment.subject, "name": assignment.name})
+    
+    assignment_obj = root.assignments[date][assignment_index]
+    assignment_obj.add_message(comment, email, reply_user)
+    transaction.commit()
+    return templates.TemplateResponse("forum.html", {"request": request, "email": email, "assignments": assignments,  "date": date, "assignment": assignment_obj})
 
 @app.get("/add_assignment", response_class=HTMLResponse)
 async def add_assignment_form(request: Request):
     return templates.TemplateResponse("admin_assignment.html", {"request": request})
 
 @app.post("/add_assignment", response_class=HTMLResponse)
-async def add_assignment(request: Request, email: str = Form(...), password: str = Form(...), assignment_name: str = Form(...), subject: str = Form(...), due_date: str = Form(...), detail: str = Form(...)):
+async def add_assignment(request: Request, email: str = Form(...), password: str = Form(...), assignment_name: str = Form(...), subject: str = Form(...), due_date: str = Form(...), content: str = Form(...)):
     students = root.students
     if email in students and students[email].password == hash_password(password):
         if due_date not in root.assignments:
-            root.assignments[due_date] = []
-        new_assignment = Assignment(assignment_name, subject, due_date, detail)
+            root.assignments[due_date] = PersistentList()
+        new_assignment = Assignment(assignment_name, subject, due_date, content)
         root.assignments[due_date].append(new_assignment)
         transaction.commit()
-        return RedirectResponse(url=f"/main/{email}", status_code=HTTP_302_FOUND)
+        return RedirectResponse(url=f"/{email}/main/{due_date}", status_code=HTTP_302_FOUND)
     return templates.TemplateResponse("error.html", {"request": request, "error": "Incorrect login"})
 
 # @app.post("/main", response_class=HTMLResponse)
@@ -151,7 +183,7 @@ async def admin_action(request: Request, action: str = Form(...), key: str = For
     elif action == "delete":
         del root[key]
     elif action == "update":
-        root[key] = value 
+        root[key] = value
     else:
         return templates.TemplateResponse("error.html", {"request": request, "error": "Invalid action"})
     transaction.commit()
