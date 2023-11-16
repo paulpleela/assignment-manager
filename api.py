@@ -210,14 +210,14 @@ async def admin_login(request: Request):
 async def admin_login(request: Request, password: str = Form(...)):
 	if password == "admin":
 		students = {email: student.__dict__ for email, student in root.students.items()}
-		assignments = {name: assignment.__dict__ for name, assignment in root.assignments.items()}
-		events = {yyyymm: event.__dict__ for yyyymm, event in root.events.items()}
+		# assignments = {name: assignment.__dict__ for name, assignment in root.assignments.items()}
+		# events = {yyyymm: event.__dict__ for yyyymm, event in root.events.items()}
 		logs = {email: log.__dict__ for email, log in root.login_history.items()}
 		
 		data = {
 			"Students": students,
-			"Assignments": assignments,
-			"Event" : events,
+			# "Assignments": assignments,
+			# "Event" : events,
 			"Logs": logs
 		}
 		return templates.TemplateResponse("admin_page.html", {"request": request, "data": data , "visual": root.visual[request.client.host]})
@@ -246,12 +246,7 @@ async def admin_action(request: Request, action: str = Form(...), key: str = For
 	transaction.commit()
 
 	students = {email: student.__dict__ for email, student in root.students.items()}
-	assignments = {name: assignment.__dict__ for name, assignment in root.assignments.items()}
-	events = {yyyymm: event.__dict__ for yyyymm, event in root.events.items()}
-
 	data = {
-		"Students": students,
-		"Assignments": assignments,
-		"Event" : events
+		"Students": students
 	}
 	return templates.TemplateResponse("admin_page.html", {"request": request, "data": data, "visual": root.visual[request.client.host]})
