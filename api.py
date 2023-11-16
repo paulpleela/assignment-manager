@@ -100,7 +100,6 @@ async def login(request: Request, email: str = Form(...), password: str = Form(.
 		return RedirectResponse(url=f"/{email}/main/{yyyymm}", status_code=HTTP_302_FOUND)
 	return templates.TemplateResponse("error.html", {"request": request, "error": "Incorrect login"})
 
-
 def is_logged_in(email: str = None):
     if email not in root.students:
        raise HTTPException(status_code=HTTP_303_SEE_OTHER, detail="/login")
@@ -108,16 +107,37 @@ def is_logged_in(email: str = None):
 
 @app.get("/{email}/main/{yyyymm}", response_class=HTMLResponse)
 async def get_by_month(request: Request, yyyymm: str, email: str = Depends(is_logged_in)):
+    can_edit : bool = root.students[email].edit
     if yyyymm in root.events:
-        events = root.events[yyyymm]
+        events = root.events[yyyymm].events
     else:
         events = ["No upcoming events this month."]
+
     assignment_days = []
     for date, assignments_list in root.assignments.items():
         assignment_yyyymm = date[:7]
         if (assignment_yyyymm == yyyymm and assignments_list):
             assignment_days.append(int(date[-2:]))
-    return templates.TemplateResponse("main.html", {"request": request, "email": email, "events": events, "yyyymm": yyyymm, "assignment_days": assignment_days})
+    return templates.TemplateResponse("main.html", {"request": request, "email": email, "events": events, "yyyymm": yyyymm, "assignment_days": assignment_days, "can_edit": can_edit})
+
+@app.post("/{email}/main/{yyyymm}", response_class=HTMLResponse)
+async def add_event(request: Request, yyyymm: str, content: str = Form(...), email: str = Depends(is_logged_in)):
+    can_edit : bool = root.students[email].edit
+    if yyyymm in root.events:
+        root.events[yyyymm].events.append(content)
+    else:
+        new_event = Event(yyyymm, content)
+        root.events[yyyymm] = new_event;
+    transaction.commit()
+
+    events = root.events[yyyymm].events
+    
+    assignment_days = []
+    for date, assignments_list in root.assignments.items():
+        assignment_yyyymm = date[:7]
+        if (assignment_yyyymm == yyyymm and assignments_list):
+            assignment_days.append(int(date[-2:]))
+    return templates.TemplateResponse("main.html", {"request": request, "email": email, "events": events, "yyyymm": yyyymm, "assignment_days": assignment_days, "can_edit": can_edit})
 
 @app.get("/{email}/assignments/{date}", response_class=HTMLResponse)
 async def get_assignments(request: Request, date: str, email: str = Depends(is_logged_in)):
@@ -130,6 +150,7 @@ async def get_assignments(request: Request, date: str, email: str = Depends(is_l
 
 @app.post("/{email}/assignments/{date}", response_class=HTMLResponse)
 async def add_assignment(request: Request, date: str, assignment_name: str = Form(...), subject: str = Form(...), content: str = Form(...), email: str = Depends(is_logged_in)):
+    can_edit : bool = root.students[email].edit
     if date not in root.assignments:
         root.assignments[date] = PersistentList()
     new_assignment = Assignment(assignment_name, subject, date, content, email)
@@ -139,7 +160,7 @@ async def add_assignment(request: Request, date: str, assignment_name: str = For
     assignments = []
     for assignment in root.assignments[date]:
         assignments.append({"subject": assignment.subject, "name": assignment.name})
-    return templates.TemplateResponse("assignment.html", {"request": request, "email": email, "assignments": assignments, "date": date})
+    return templates.TemplateResponse("assignment.html", {"request": request, "email": email, "assignments": assignments, "date": date, "can_edit": can_edit})
 
 @app.get("/{email}/assignments/{date}/{assignment_index}", response_class=HTMLResponse)
 async def get_assignment(request: Request, date: str, assignment_index: int, email: str = Depends(is_logged_in)):

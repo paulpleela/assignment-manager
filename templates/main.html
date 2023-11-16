@@ -83,6 +83,60 @@
                     flex-direction: column;
                 }
             }
+
+            .modal {
+                display: none;
+                margin: 10px;
+            }
+
+            .close {
+                display: flex;
+                transition: .2s;
+                cursor: pointer;
+                font-size: 50px;
+                width: fit-content;
+                height: fit-content;
+            }
+
+            .close:hover{
+                color: red;
+            }
+
+            #submit , #openModal{
+                font-family: Arial, sans-serif;
+                font-size: 24px;
+                cursor: pointer;
+                background-color: #9ccbfe;
+                border-radius: 20px;
+                display: flex;
+                margin-top: 50px;
+                left: 50%;
+                transition: .2s;
+                width: 140px;
+                margin: 20px auto;
+                padding: 10px;
+            }
+
+            #submit:hover , #openModal:hover , .close:hover{
+                transform: scale(1.1 , 1.1);
+            }
+
+			textarea{
+				resize: none;
+				font-size: 25px;
+				width: 90%;
+				border-radius: 10px;
+				font-family: Arial, sans-serif;
+				height: 150px;
+                width: 100%;
+			}
+
+			select , input {
+				font-size:  25px;
+				font-family: Arial, sans-serif;
+				width : 90% ;
+				border-radius: 10px;
+			}
         </style>
     </head>
     <body>
@@ -122,6 +176,18 @@
                         <li>{{ event }}</li>
                     {% endfor %}
                 </ul>
+                {% if can_edit == True %}
+                    <button id="openModal">Add Event</button>
+                    <div id="myModal" class="modal">
+                        <div class="modal-content">
+                            <div class="close">×</div>
+                            <form onsubmit="return checkField()" method="post">
+                                <textarea id="content" name="content"></textarea></td>
+                                <input type="submit" value="Add Event" id="submit">
+                            </form>
+                        </div>
+                    </div>
+			    {% endif %}
             </div>
         </div>
 
@@ -201,6 +267,35 @@
                 let path = window.location.href.substring(0, window.location.href.lastIndexOf('/'));
                 window.location.href = `/{{ email }}/main/${yyyymm}`;
             }
+
+            var modal = document.getElementById("myModal");
+		    var btn = document.getElementById("openModal");
+		    var span = document.getElementsByClassName("close")[0];
+
+		    btn.onclick = function() {
+		        modal.style.display = "block";
+		        btn.style.display = "none" ;
+		    }
+
+		    span.onclick = function() {
+		        modal.style.display = "none";
+		        btn.style.display = "block" ;
+		    }
+
+            window.onclick = function(event) {
+                if (event.target == modal) {
+                    modal.style.display = "none";
+                }
+            }
+
+            function checkField() {
+				let contentField = document.getElementById("content").value;
+				if (contentField.trim() == "") {
+					alert("Please fill out field to post.");
+					return false;
+				}
+				return true;
+			}
         </script>
     </body>
 </html>
