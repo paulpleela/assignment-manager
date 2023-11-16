@@ -14,9 +14,13 @@ database.fs
 *.lock
 *.tmp
 *.png
+*.jpg
+*.jpeg
+*.ppt
 
 # Log files
 *.log
 
 # VS Code
 .vscode
+

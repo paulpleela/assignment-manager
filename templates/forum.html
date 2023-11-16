@@ -271,7 +271,7 @@
             }
         </style>
     </head>
-    <body>
+    <body onload="on_load()">
         <div class="sidebar" id="sidebar">
             <ul id="assignments-list">
                 {% for assignment in assignments %}
@@ -331,6 +331,7 @@
 			</form>
         </div>
         <button id="go-back" onclick="goBack()">&#9664;</button>
+	</body>
         <script>
             let date = "{{ date }}";
             let formatted_date = new Date(date).toLocaleDateString("en-US", {day: "numeric", month: "long", year: "numeric"});
@@ -381,16 +382,6 @@
                     reply_user.innerHTML = e.target.textContent;
                     document.getElementById("reply-field").value = reply_user.innerHTML;
                     reply_indicator.style.display = "block" ;
-                    document.getElementById("close-reply-indicator").style.display = "block" ;
-					let commentBox = document.getElementById("cmt-box");
-					let fileLink = document.createElement("a");
-					fileLink.href = "/downloadfile/" + e.target.getAttribute("data-filename");
-					fileLink.textContent = "Download file";
-					commentBox.appendChild(fileLink);
-					let imagePreview = document.createElement("img");
-					imagePreview.src = fileLink.href;
-					imagePreview.style.maxWidth = "200px";
-					commentBox.appendChild(imagePreview);
 				}
                 if(event == "close-reply-indicator"){
                     document.getElementById("reply-field").value = null;
@@ -418,6 +409,38 @@
             function goBack() {
                 window.location.href = `/{{ email }}/assignments/{{ date }}`;
             }
+
+			function on_load() {
+				if ("{{ visual }}" == 'dark_mode')
+				{
+					document.body.querySelector(".sidebar").style.backgroundColor = "#1a1a1a";
+					document.body.querySelector(".sidebar-minimized").style.backgroundColor = "#1a1a1a";
+					document.body.querySelector(".sidebar-minimized").style.color = "white";
+					document.body.querySelector(".content").style.backgroundColor = "#1a1a1a";
+					document.body.querySelector(".content").style.color = "white";
+					document.body.querySelector("#sidebar-button").style.color = "white";
+					document.body.querySelector("#sidebar-button").style.backgroundColor = "#1a1a1a";
+					document.body.querySelector("#go-back").style.color = "white";
+					document.body.querySelector("#go-back").style.backgroundColor = "#1a1a1a";
+					document.body.querySelector("#submit").style.color = "white";
+					document.body.querySelector("#submit").style.backgroundColor = "#1a1a1a";
+					document.body.querySelector("#close-reply-indicator").style.color = "white";
+					document.body.querySelector("#close-reply-indicator").style.backgroundColor = "#1a1a1a";
+					document.body.querySelector("#reply-indicator").style.color = "white";
+					document.body.querySelector("#reply-indicator").style.backgroundColor = "#1a1a1a";
+					let td = document.querySelectorAll("td");
+					for (let i = 0; i < td.length; i++) {
+						if (td[i].id == "username") {
+							td[i].style.backgroundColor = "#1a1a1a";
+							td[i].style.color = "white";
+						}
+					}
+
+					document.body.querySelector(".space").style.backgroundColor = "#1a1a1a";
+					
+				}
+			}
+
         </script>
-    </body>
+   
 </html>

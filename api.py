@@ -174,20 +174,21 @@ async def get_assignment(request: Request, date: str, assignment_index: int, ema
         for assignment in root.assignments[date]:
             assignments.append({"subject": assignment.subject, "name": assignment.name})
     assignment_obj = root.assignments[date][assignment_index]
-    return templates.TemplateResponse("forum.html", {"request": request, "email": email, "assignments": assignments,  "date": date, "assignment": assignment_obj})
+    return templates.TemplateResponse("forum.html", {"request": request, "email": email, "assignments": assignments,  "date": date, "assignment": assignment_obj, "visual" : root.visual[request.client.host]})
 
 @app.post("/{email}/assignments/{date}/{assignment_index}", response_class=HTMLResponse)
 async def add_forum_msg(request: Request, date: str, assignment_index: int, email: str = Depends(is_logged_in), reply_user: str = Form(None), comment: str = Form(...), file: UploadFile = File(None)):
-    if file:
-        filename = str(uuid.uuid4()) + file.filename
-        unique_filename = "./static/" + filename
-        with open(unique_filename, "wb") as buffer:
-            buffer.write(await file.read())
-    
-    assignment_obj = root.assignments[date][assignment_index]
-    assignment_obj.add_message(comment, email, reply_user, filename)
-    transaction.commit()
-    return RedirectResponse(url=f"/{email}/assignments/{date}/{assignment_index}", status_code=HTTP_303_SEE_OTHER)
+	filename = None
+	if file.size > 0:
+		filename = str(uuid.uuid4()) + file.filename
+		unique_filename = "./static/" + filename
+		with open(unique_filename, "wb") as buffer:
+			buffer.write(await file.read())
+
+	assignment_obj = root.assignments[date][assignment_index]
+	assignment_obj.add_message(comment, email, reply_user, filename)
+	transaction.commit()
+	return RedirectResponse(url=f"/{email}/assignments/{date}/{assignment_index}", status_code=HTTP_303_SEE_OTHER)
 
 @app.post("/visual")
 async def visual(request: Request):
