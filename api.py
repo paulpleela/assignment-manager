@@ -164,14 +164,15 @@ async def add_forum_msg(request: Request, date: str, assignment_index: int, emai
 
 @app.post("/uploadfile/")
 async def create_upload_file(file: UploadFile = File(...)):
-    unique_filename = str(uuid.uuid4()) + "_" + file.filename
+    unique_filename = "./static/" + str(uuid.uuid4()) + "_" + file.filename
     with open(unique_filename, "wb") as buffer:
         buffer.write(await file.read())
     return {"filename": unique_filename}
 
 @app.get("/downloadfile/{filename}")
 async def main(filename: str):
-    return FileResponse(filename)
+    return FileResponse("./static/" + filename)
+
 	
 # @app.post("/main", response_class=HTMLResponse)
 # async def main(request: Request, email: str = Form(...), password: str = Form(...)):

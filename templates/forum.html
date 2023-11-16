@@ -280,16 +280,21 @@
             
             <!-- space -->
             <div class="space"></div>
-            <form onsubmit="return checkField()" method="post">
-            <!-- re -->
-                <div id="reply-indicator">RE: <span id="reply-user"></span></div>
-                <button id="close-reply-indicator">&#x2716;</button>
-
-            <!-- Text mesage -->
-                <input type="hidden" id="reply-field" name="reply_user">
-                <textarea id="comment" name="comment"></textarea>
-                <button id = "submit" type="submit">&#10140;</button>
-            </form>
+			<form id="post-form" onsubmit="return checkField()" method="post" enctype="multipart/form-data">
+				<!-- re -->
+				<div id="reply-indicator">RE: <span id="reply-user"></span></div>
+				<button id="close-reply-indicator">✖</button>
+			
+				<!-- Text mesage -->
+				<input type="hidden" id="reply-field" name="reply_user">
+				<textarea id="comment" name="comment"></textarea>
+			
+				<!-- File Upload -->
+				<input type="file" id="file" name="file">
+			
+				<button id = "submit" type="submit">➜</button>
+			</form>
+			
         </div>
         <script>
             let date = "{{ date }}";
@@ -337,14 +342,21 @@
                 let event = e.target.getAttribute("id") ;
                 let reply_indicator = document.getElementById("reply-indicator") ;
                 let reply_user = document.getElementById("reply-user") ;
-                //click other's username for remessaging
                 if(event == "username"){
                     reply_user.innerHTML = e.target.textContent;
                     document.getElementById("reply-field").value = reply_user.innerHTML;
                     reply_indicator.style.display = "block" ;
                     document.getElementById("close-reply-indicator").style.display = "block" ;
-                }
-                //close remessaging
+					let commentBox = document.getElementById("cmt-box");
+					let fileLink = document.createElement("a");
+					fileLink.href = "/downloadfile/" + e.target.getAttribute("data-filename");
+					fileLink.textContent = "Download file";
+					commentBox.appendChild(fileLink);
+					let imagePreview = document.createElement("img");
+					imagePreview.src = fileLink.href;
+					imagePreview.style.maxWidth = "200px";
+					commentBox.appendChild(imagePreview);
+				}
                 if(event == "close-reply-indicator"){
                     document.getElementById("reply-field").value = null;
                     document.getElementById("reply-indicator").style.display = "none" ;
@@ -352,12 +364,47 @@
                 }
             })
 
+		// 	document.getElementById('post-form').addEventListener('submit', function (event) {
+		// 	event.preventDefault(); // Prevent the default form submission
+
+		// 	if (checkField()) {
+		// 		const formData = new FormData();
+		// 		formData.append('comment', document.getElementById('comment').value);
+		// 		formData.append('reply_user', document.getElementById('reply-field').value);
+		// 		formData.append('file', document.getElementById('file').files[0]);
+
+		// 		fetch('/uploadfile/', {
+		// 			method: 'POST',
+		// 			body: formData,
+		// 		})
+		// 		.then(response => response.json())
+		// 		.then(data => {
+		// 			// Handle the response from the server if needed
+		// 			console.log(data);
+
+		// 			// Manually submit the form after file upload is complete
+		// 			document.getElementById('post-form').submit();
+		// 		})
+		// 		.catch(error => {
+		// 			// Handle any errors that occurred during the fetch
+		// 			console.error('Error:', error);
+		// 		});
+		// 	}
+		// });
+
             function checkField() {
                 let commentField = document.getElementById("comment").value;
                 if (commentField.trim() == "") {
                     alert("Please fill out the message field to post.");
                     return false;
                 }
+				if (document.getElementById("file").value != "") {
+					let file = document.getElementById("file").files[0];
+					if (file.size > 10000000) {
+						alert("File size must not exceed 10MB!");
+						return false;
+					}
+				}
                 return true;
             }
         </script>
