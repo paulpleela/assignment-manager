@@ -134,7 +134,7 @@
 			select , input {
 				font-size:  25px;
 				font-family: Arial, sans-serif;
-				width : 90% ;
+				width : 20% ;
 				border-radius: 10px;
 			}
 
@@ -190,7 +190,8 @@
                 <h1>Events</h1>
                 <ul id="list-items">
                     {% for event in events %}
-                        <li>{{ event }}</li>
+                        <li>{{ event }} <input type="submit" value="Delete" name="action" onclick="resolveDelete('{{ loop.index0 }}')"></li>
+						
                     {% endfor %}
                 </ul>
                 {% if can_edit == True %}
@@ -318,6 +319,13 @@
             function logOut() {
                 window.location.href = `/logout`;
             }
+
+			function resolveDelete(event)
+			{
+			fetch (`/delete_event/{{ yyyymm }}/${event}`, {method: 'POST'})
+				//.then(() => location.reload());	
+				
+			}
 
 			function on_load() {
 				console.log("{{ visual }}");

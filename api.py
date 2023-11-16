@@ -59,11 +59,17 @@ class LoginHistory(persistent.Persistent):
 		self.ip_address = ip_address
 
 
-root.students = BTree()
-root.assignments = BTree()
-root.events = BTree()
-root.login_history = BTree()
-root.visual = {}
+if not hasattr(root, 'students'):
+    root.students = BTree()
+if not hasattr(root, 'assignments'):
+    root.assignments = BTree()
+if not hasattr(root, 'events'):
+    root.events = BTree()
+if not hasattr(root, 'login_history'):
+    root.login_history = BTree()
+if not hasattr(root, 'visual'):
+    root.visual = {}
+
 
 app = FastAPI()
 
@@ -200,10 +206,20 @@ async def logout(request: Request):
 	ip_address = request.client.host
 	del root.visual[ip_address]
 	transaction.commit()
-	return RedirectResponse(url=f"/login", status_code=HTTP_303_SEE_OTHER)	
+	return RedirectResponse(url=f"/login", status_code=HTTP_303_SEE_OTHER)
+
+#delete event
+@app.get("/delete_event/{yyyymm}/{index}")
+async def delete_event(request: Request, yyyymm: str, index: int):
+	del root.events[yyyymm].events[index]
+	transaction.commit()
+	return RedirectResponse(url=f"/{email}/main/{yyyymm}", status_code=HTTP_303_SEE_OTHER)
 
 @app.get("/admin", response_class=HTMLResponse)
 async def admin_login(request: Request):
+	if request.client.host not in root.visual:
+		root.visual[request.client.host] = "dark_mode"
+		transaction.commit()
 	return templates.TemplateResponse("admin_login.html", {"request": request, "visual": root.visual[request.client.host]})
 
 @app.post("/admin", response_class=HTMLResponse)
