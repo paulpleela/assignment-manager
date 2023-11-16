@@ -228,9 +228,8 @@ async def admin_action(request: Request, action: str = Form(...), key: str = For
 	if action == "Delete":
 		del root.students[key]
 	elif action == "Update":
-		args : dict = eval(value) # Danger!!!
+		args : dict = eval(value)
 		root.students[args['email']] = Student(args['email'], args['password'], args['edit'])
-		del root.students[key]
 	elif action == "Create":
 		args : dict = eval(value)
 		root.students[args['email']] = Student(args['email'], args['password'], args['edit'])
