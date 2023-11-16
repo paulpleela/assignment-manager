@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Request, Form, HTTPException, Depends, Body
+from fastapi import FastAPI, Request, Form, HTTPException, Depends, Body, File, UploadFile
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import HTMLResponse, RedirectResponse, FileResponse
 from starlette.status import HTTP_302_FOUND, HTTP_303_SEE_OTHER
