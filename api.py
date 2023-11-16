@@ -213,7 +213,7 @@ async def logout(request: Request):
 async def delete_event(request: Request, yyyymm: str, index: int):
     del root.events[yyyymm].events[index]
     transaction.commit()
-    return RedirectResponse(url=f"/{email}/main/{yyyymm}", status_code=HTTP_303_SEE_OTHER)
+    # return RedirectResponse(url=f"/{email}/main/{yyyymm}", status_code=HTTP_303_SEE_OTHER)
 
 
 @app.get("/admin", response_class=HTMLResponse)
