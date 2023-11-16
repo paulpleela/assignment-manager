@@ -280,10 +280,12 @@
             
             <!-- space -->
             <div class="space"></div>
+			
+			<!-- re -->
+			<div id="reply-indicator">RE: <span id="reply-user"></span></div>
+			<button id="close-reply-indicator">✖</button>
+
 			<form id="post-form" onsubmit="return checkField()" method="post" enctype="multipart/form-data">
-				<!-- re -->
-				<div id="reply-indicator">RE: <span id="reply-user"></span></div>
-				<button id="close-reply-indicator">✖</button>
 			
 				<!-- Text mesage -->
 				<input type="hidden" id="reply-field" name="reply_user">
