@@ -221,8 +221,6 @@ async def logout(request: Request):
 	transaction.commit()
 	return RedirectResponse(url=f"/login", status_code=HTTP_302_FOUND)	
 
-
-
 @app.get("/admin", response_class=HTMLResponse)
 async def admin_login(request: Request):
 	return templates.TemplateResponse("admin_login.html", {"request": request, "visual": root.visual[request.client.host]})

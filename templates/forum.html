@@ -43,6 +43,7 @@
                 border-radius: 20px;
                 background-color: #9ccbfe;
                 border: 3px solid black;
+                cursor: pointer;
             }
 
             div.assignment-name {
@@ -63,6 +64,18 @@
             }
 
             .sidebar-button {
+                background-color: #007BFF;
+                border: 0;
+                color: #ffffff;
+                font-size: 30px;
+                font-weight: bold;
+                display: flex;
+                align-items: flex-start;
+                flex-direction: column;
+                cursor: pointer;
+            }
+
+            .sidebar-minimized {
                 background-color: #007BFF;
                 border: 0;
                 color: #ffffff;
@@ -239,6 +252,23 @@
                 font-size: 13px;
                 line-height: 15px;
             }
+
+            #go-back {
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                height: 50px;
+                width: 50px;
+                border: 0;
+                background-color: transparent;
+                font-size: 40px;
+                color: orange;
+                cursor: pointer;
+            }
+
+            #go-back:active {
+                color: red;
+            }
         </style>
     </head>
     <body>
@@ -252,7 +282,7 @@
                 {% endfor %}
             </ul>
         </div>
-        <div class="sidebar-button">
+        <div class="sidebar-minimized">
             <button id="sidebar-button" class="sidebar-button" onclick="toggleSidebar()">&#x2716;</button>
             <div class="display-date" id="display-date"></div>
         </div>
@@ -296,8 +326,8 @@
 			
 				<button id = "submit" type="submit">➜</button>
 			</form>
-			
         </div>
+        <button id="go-back" onclick="goBack()">&#9664;</button>
         <script>
             let date = "{{ date }}";
             let formatted_date = new Date(date).toLocaleDateString("en-US", {day: "numeric", month: "long", year: "numeric"});
@@ -408,6 +438,10 @@
 					}
 				}
                 return true;
+            }
+
+            function goBack() {
+                window.location.href = `/{{ email }}/assignments/{{ date }}`;
             }
         </script>
     </body>

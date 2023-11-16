@@ -137,6 +137,23 @@
 				width : 90% ;
 				border-radius: 10px;
 			}
+
+            #log-out {
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                height: 50px;
+                width: 50px;
+                border: 0;
+                background-color: transparent;
+                font-size: 40px;
+                color: orange;
+                cursor: pointer;
+            }
+
+            #log-out:active {
+                color: red;
+            }
         </style>
     </head>
     <body>
@@ -190,7 +207,7 @@
 			    {% endif %}
             </div>
         </div>
-
+        <button id="log-out" onclick="logOut()">&#9664;</button>
         <script>
             let now = new Date();
             let yyyymm = "{{ yyyymm }}";
@@ -296,6 +313,10 @@
 				}
 				return true;
 			}
+
+            function logOut() {
+                window.location.href = `/logout`;
+            }
         </script>
     </body>
 </html>

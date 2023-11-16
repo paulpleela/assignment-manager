@@ -147,6 +147,23 @@
 				width : 90% ;
 				border-radius: 10px;
 			}
+
+            #go-back {
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                height: 50px;
+                width: 50px;
+                border: 0;
+                background-color: transparent;
+                font-size: 40px;
+                color: orange;
+                cursor: pointer;
+            }
+
+            #go-back:active {
+                color: red;
+            }
         </style>
     </head>
     <body>
@@ -188,6 +205,7 @@
                     </div>
                 </div>
 			{% endif %}
+        <button id="go-back" onclick="goBack()">&#9664;</button>
         <script>
             let date = "{{ date }}";
             let formatted_date = new Date(date).toLocaleDateString("en-US", {day: "numeric", month: "long", year: "numeric"});
@@ -231,6 +249,11 @@
 				}
 				return true;
 			}
+
+            function goBack() {
+                let yyyymm = "{{ date }}".slice(0, -3);
+                window.location.href = `/{{ email }}/main/${yyyymm}`;
+            }
         </script>
     </body>
 </html>
