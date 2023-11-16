@@ -1,6 +1,6 @@
 from fastapi import FastAPI, Request, Form, HTTPException, Depends, Body
 from fastapi.templating import Jinja2Templates
-from fastapi.responses import HTMLResponse, RedirectResponse
+from fastapi.responses import HTMLResponse, RedirectResponse, FileResponse
 from starlette.status import HTTP_302_FOUND, HTTP_303_SEE_OTHER
 from datetime import datetime
 import hashlib
@@ -11,7 +11,7 @@ import transaction
 import persistent
 from persistent.list import PersistentList
 import re
-
+import uuid
 storage = ZODB.FileStorage.FileStorage('database.fs')
 db = ZODB.DB(storage)
 connection = db.open()
@@ -163,6 +163,18 @@ async def add_assignment(request: Request, email: str = Form(...), password: str
         return RedirectResponse(url=f"/{email}/main/{due_date}", status_code=HTTP_302_FOUND)
     return templates.TemplateResponse("error.html", {"request": request, "error": "Incorrect login"})
 
+
+@app.post("/uploadfile/")
+async def create_upload_file(file: UploadFile = File(...)):
+    unique_filename = str(uuid.uuid4()) + "_" + file.filename
+    with open(unique_filename, "wb") as buffer:
+        buffer.write(await file.read())
+    return {"filename": unique_filename}
+
+@app.get("/downloadfile/{filename}")
+async def main(filename: str):
+    return FileResponse(filename)
+	
 # @app.post("/main", response_class=HTMLResponse)
 # async def main(request: Request, email: str = Form(...), password: str = Form(...)):
 # 	students = root.students
