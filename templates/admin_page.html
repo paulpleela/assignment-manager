@@ -46,6 +46,7 @@
 		border: none;
 		color: #fff;
 		cursor: pointer;
+		transition: background-color 0.3s ease;
 	}
 
 	input[type="submit"][name="action"][value="Update"] {
@@ -58,6 +59,15 @@
 
 	input[type="submit"][name="action"][value="Create"] {
 		background-color: #008CBA;
+	}
+
+	input[type="submit"]:hover {
+		background-color: #333;
+	}
+
+	.dark-mode {
+		background-color: #333;
+		color: #fff;
 	}
 
 </style>
@@ -99,4 +109,16 @@
     {% endfor %}
     </ul>
 </body>
+<script>
+	window.addEventListener('load', (event) => {
+		on_load();
+	});
+
+	function on_load() {
+		console.log("{{ visual }}");
+		if ("{{ visual }}" == 'dark_mode') {
+			document.body.classList.add('dark-mode');
+		}
+	}
+</script>
 </html>

@@ -41,6 +41,11 @@
 		background-color: #4CAF50;
 	}
 
+	.dark-mode {
+		background-color: #333;
+		color: #fff;
+	}
+
 </style>
 <body>
     <h1>Admin Login</h1>
@@ -49,4 +54,13 @@
         <input type="submit" value="Login">
     </form>
 </body>
+<script>
+	window.addEventListener('load', (event) =>
+	{
+		if ("{{ visual }}" == 'dark_mode') {
+			document.body.classList.add('dark-mode');
+		}
+	});
+	
+</script>
 </html>

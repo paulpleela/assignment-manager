@@ -5,7 +5,7 @@
 	<style>
 		body {
 			font-family: Arial, sans-serif;
-			background-color: #f4f4f4;
+			background-color: rgb(35, 35, 35);
 			margin: 0;
 			padding: 0;
 			transition: background-color 0.5s ease;
@@ -14,18 +14,18 @@
 		.container {
 			max-width: 300px;
 			padding: 16px;
-			background-color: white;
+			background-color: rgb(64, 64, 64);
 			margin: 0 auto;
 			margin-top: 100px;
 			border: 1px solid #f4f4f4;
 			border-radius: 4px;
-			box-shadow: 0 0 10px rgba(0,0,0,0.1);
+			box-shadow: 0 0 10px rgba(255, 255, 255, 0.684);
 			animation: slide-up 0.5s ease;
 		}
 
 		.container h2 {
 			text-align: center;
-			color: #333;
+			color: #dbdbdb;
 			margin-bottom: 30px;
 		}
 
@@ -60,6 +60,7 @@
 		.container p {
 			text-align: center;
 			margin-top: 10px;
+			color: #dbdbdb;
 		}
 
 		.container p a {
@@ -70,7 +71,7 @@
 
 		.container p a:hover {
 			text-decoration: underline;
-			color: #0056b3;
+			color: #84bfff;
 		}
 
 		@media screen and (max-width: 600px) {
@@ -103,6 +104,35 @@
 				event.preventDefault();
         	}
 		}
+
+		function toggleMode() {
+		fetch('/visual/', { method: 'POST' })
+			.then(() => location.reload());
+		}
+
+		window.addEventListener('load', (event) => {
+			on_load();
+		});
+
+		function on_load() {
+					if ("{{ visual }}" == 'dark_mode') {
+						document.body.style.backgroundColor = 'rgb(35, 35, 35)';
+						document.querySelector('.container').style.backgroundColor = 'rgb(64, 64, 64)';
+						document.querySelector('.container').style.boxShadow = '0 0 10px rgba(255, 255, 255, 0.684)';
+						document.querySelector('.container').style.borderColor = '#f4f4f4';
+						document.querySelector('.container').style.color = '#dbdbdb';
+						document.querySelector('.container h2').style.color = 'white';
+					} else {
+						document.body.style.backgroundColor = 'white';
+						document.querySelector('.container').style.backgroundColor = 'white';
+						document.querySelector('.container').style.boxShadow = '0 0 10px rgba(0, 0, 0, 0.684)';
+						document.querySelector('.container').style.borderColor = '#f4f4f4';
+						document.querySelector('.container').style.color = 'black';
+						document.querySelector('.container p').style.color = 'black';
+						document.querySelector('.container h2').style.color = 'black';
+					}
+				}
+
     </script>
 </head>
 <body>
@@ -114,6 +144,7 @@
             <button type="submit">Register</button>
         </form>
         <p>Already have an account? <a href="/login">Login</a></p>
+		<button onclick="toggleMode()">Toggle Mode</button>
     </div>
 </body>
 </html>

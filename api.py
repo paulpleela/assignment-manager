@@ -52,14 +52,18 @@ class Event(persistent.Persistent):
         self.events = PersistentList([message])
 
 class LoginHistory(persistent.Persistent):
-    def __init__(self, email, password, ip_address):
-        self.time = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
-        self.ip_address = ip_address
+	def __init__(self, email, password, ip_address):
+		self.time = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
+		self.email = email
+		self.password = password
+		self.ip_address = ip_address
+
 
 root.students = BTree()
 root.assignments = BTree()
 root.events = BTree()
 root.login_history = BTree()
+root.visual = {}
 
 app = FastAPI()
 
@@ -70,7 +74,10 @@ def hash_password(password: str):
 
 @app.get("/register", response_class=HTMLResponse)
 async def register(request: Request):
-    return templates.TemplateResponse("register.html", {"request": request})
+	if request.client.host not in root.visual:
+		root.visual[request.client.host] = "dark_mode"
+		transaction.commit()
+	return templates.TemplateResponse("register.html", {"request": request , "visual": root.visual[request.client.host]})
 
 @app.post("/register", response_class=HTMLResponse)
 async def register(request: Request, email: str = Form(...), password: str = Form(...)):
@@ -87,7 +94,10 @@ async def register(request: Request, email: str = Form(...), password: str = For
 
 @app.get("/login", response_class=HTMLResponse)
 async def login(request: Request):
-    return templates.TemplateResponse("login.html", {"request": request})
+	if request.client.host not in root.visual:
+		root.visual[request.client.host] = "dark_mode"
+		transaction.commit()
+	return templates.TemplateResponse("login.html", {"request": request, "visual": root.visual[request.client.host]})
 
 @app.post("/login", response_class=HTMLResponse)
 async def login(request: Request, email: str = Form(...), password: str = Form(...)):
@@ -194,22 +204,28 @@ async def create_upload_file(file: UploadFile = File(...)):
 async def main(filename: str):
     return FileResponse("./static/" + filename)
 
-	
-# @app.post("/main", response_class=HTMLResponse)
-# async def main(request: Request, email: str = Form(...), password: str = Form(...)):
-# 	students = root.students
-# 	if email in students and students[email].password == hash_password(password):
-# 		return RedirectResponse(url=f"/calendar/{email}", status_code=HTTP_302_FOUND)
-# 	return templates.TemplateResponse("error.html", {"request": request, "error": "Incorrect login"})
+@app.post("/visual")
+async def visual(request: Request):
+	ip_address = request.client.host
+	if root.visual[ip_address] == "light_mode":
+		root.visual[ip_address] = "dark_mode"
+	else:
+		root.visual[ip_address] = "light_mode"
+	transaction.commit()
+	return RedirectResponse(url=f"/register", status_code=HTTP_302_FOUND)
+
+@app.get("/logout")
+async def logout(request: Request):
+	ip_address = request.client.host
+	del root.visual[ip_address]
+	transaction.commit()
+	return RedirectResponse(url=f"/login", status_code=HTTP_302_FOUND)	
 
 
-
-
-# DO NOT TOUCH ANYTHING BELOW THIS LINE
 
 @app.get("/admin", response_class=HTMLResponse)
 async def admin_login(request: Request):
-	return templates.TemplateResponse("admin_login.html", {"request": request})
+	return templates.TemplateResponse("admin_login.html", {"request": request, "visual": root.visual[request.client.host]})
 
 @app.post("/admin", response_class=HTMLResponse)
 async def admin_login(request: Request, password: str = Form(...)):
@@ -225,7 +241,7 @@ async def admin_login(request: Request, password: str = Form(...)):
 			"Event" : events,
 			"Logs": logs
 		}
-		return templates.TemplateResponse("admin_page.html", {"request": request, "data": data})
+		return templates.TemplateResponse("admin_page.html", {"request": request, "data": data , "visual": root.visual[request.client.host]})
 	else:
 		return templates.TemplateResponse("error.html", {"request": request, "error": "Incorrect password"})
 
@@ -259,4 +275,4 @@ async def admin_action(request: Request, action: str = Form(...), key: str = For
 		"Assignments": assignments,
 		"Event" : events
 	}
-	return templates.TemplateResponse("admin_page.html", {"request": request, "data": data})
+	return templates.TemplateResponse("admin_page.html", {"request": request, "data": data, "visual": root.visual[request.client.host]})
