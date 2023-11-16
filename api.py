@@ -97,7 +97,7 @@ async def login(request: Request):
 async def login(request: Request, email: str = Form(...), password: str = Form(...)):
 	students = root.students
 	if email in students and students[email].password == hash_password(password):
-		yyyymm = datetime.now().strftime("%Y%m")
+		yyyymm = datetime.now().strftime("%Y-%m")
 		ip_address = request.client.host
 		root.login_history[email] = LoginHistory(email, password, ip_address)
 		transaction.commit()
