@@ -69,6 +69,7 @@
                 margin-bottom: 10px;
                 border-radius: 20px;
                 width: 70vw;
+                cursor: pointer;
             }
 
             .assignment-name {
@@ -81,6 +82,71 @@
                 font-weight: bold;
                 pointer-events: none;
             }
+
+            .modal {
+                display: none;
+            }
+
+            .close {
+                display: flex;
+                transition: .2s;
+                cursor: pointer;
+                font-size: 50px;
+                width: fit-content;
+                height: fit-content;
+            }
+
+            .close:hover{
+                color: red;
+            }
+
+            #submit , #openModal{
+                font-family: Arial, sans-serif;
+                font-size: 24px;
+                cursor: pointer;
+                background-color: #9ccbfe;
+                border-radius: 20px;
+                display: flex;
+                margin-top: 50px;
+                left: 50%;
+                transition: .2s;
+                width: 200px;
+                margin: 20px auto;
+                align-items: center;
+                padding: 10px;
+            }
+
+            #submit:hover , #openModal:hover , .close:hover{
+                transform: scale(1.1 , 1.1);
+            }
+
+            table{
+				width: 100%;
+			}
+
+			td {
+				vertical-align: top;
+				height: 70px;
+				padding-left: 30px;
+				color: black;
+				font-size: 25px;
+			}
+
+			textarea{
+				resize: none;
+				font-size: 25px;
+				width: 90%;
+				border-radius: 10px;
+				font-family: Arial, sans-serif;
+				height: 150px;
+			}
+
+			select , input {
+				font-size:  25px;
+				font-family: Arial, sans-serif;
+				width : 90% ;
+				border-radius: 10px;
+			}
         </style>
     </head>
     <body>
@@ -97,6 +163,31 @@
                     </li>
                 {% endfor %}
             </ul>
+            {% if can_edit %}
+                <button id="openModal">Add Assignment</button>
+                <div id="myModal" class="modal">
+                    <div class="modal-content">
+                        <div class="close">×</div>
+                        <form onsubmit="return checkFields()" method="post">
+                            <table>
+                                <tr>
+                                    <td><label for="assignment_name">Assignment Name:</label></td>
+                                    <td><input type="text" id="assignment_name" name="assignment_name"></td>
+                                </tr>
+                                <tr>
+                                    <td><label for="subject">Subject:</label></td>
+                                    <td><input type="text" id="subject" name="subject"></td>
+                                </tr>
+                                <tr>
+                                    <td><label for="content">Details:</label></td>
+                                    <td><textarea id="content" name="content"></textarea></td>
+                                </tr>
+                            </table>
+                            <input type="submit" value="Add Assignment" id="submit">
+                        </form>
+                    </div>
+                </div>
+            {% endif %}
         </div>
         <script>
             let date = "{{ date }}";
@@ -110,6 +201,37 @@
                     window.location.href = `/{{ email }}/assignments/{{ date }}/${index}`;
                 }
             })
+
+            var modal = document.getElementById("myModal");
+		    var btn = document.getElementById("openModal");
+		    var span = document.getElementsByClassName("close")[0];
+
+		    btn.onclick = function() {
+		        modal.style.display = "block";
+		        btn.style.display = "none" ;
+		    }
+
+		    span.onclick = function() {
+		        modal.style.display = "none";
+		        btn.style.display = "block" ;
+		    }
+
+            window.onclick = function(event) {
+                if (event.target == modal) {
+                    modal.style.display = "none";
+                }
+            }
+
+            function checkFields() {
+				let nameField = document.getElementById("assignment_name").value;
+				let subjectField = document.getElementById("subject").value;
+				let contentField = document.getElementById("content").value;
+				if (nameField.trim() == "" || subjectField.trim() == "" || contentField.trim() == "") {
+					alert("Please fill out all fields to post.");
+					return false;
+				}
+				return true;
+			}
         </script>
     </body>
 </html>

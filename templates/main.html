@@ -60,6 +60,10 @@
                 padding-left: 20px;
             }
             
+            .clickable {
+                cursor: pointer;
+            }
+
             .list-box {
                 flex: 6;
                 background-color: #d3d3d3;
@@ -84,12 +88,12 @@
     <body>
         <div class="flex-row">
             <div class="header-box">
-                <button class="navigation" onclick="prevMonth()">&lt;</button>
+                <button class="navigation clickable" onclick="prevMonth()">&lt;</button>
                 <div>
                     <h2 id="year-header"></h2>
                     <h1 id="month-header"></h1>
                 </div>
-                <button class="navigation" onclick="nextMonth()">&gt;</button>
+                <button class="navigation clickable" onclick="nextMonth()">&gt;</button>
             </div>
         </div>
 
@@ -153,13 +157,14 @@
                             }
                             if (assignment_days.includes(date)) {
                                 newDate.classList.add("flag");
-                                newDate.addEventListener("click", (function(date, shownMonth, shownYear) {
+                            }
+                            newDate.addEventListener("click", (function(date, shownMonth, shownYear) {
                                     return function() {
                                         let clickedDate = date < 10 ? `0${date}` : `${date}`;
                                         window.location.href = `/{{ email }}/assignments/${yyyymm}-${clickedDate}`;
                                     };
                                 })(date, shownMonth, shownYear));
-                            }
+                            newDate.classList.add("clickable");
                             date++;
                         }
                         newWeek.appendChild(newDate);

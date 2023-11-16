@@ -96,6 +96,14 @@
                 text-align: justify;
                 white-space: pre-wrap;
             }
+            
+            #assignment-posted-by{
+                font-size: 15px;
+                padding-left: 20px;
+                padding-right: 20px;
+                text-align: justify;
+                white-space: pre-wrap;
+            }
 
             #due{
                 color: rgb(166, 36, 36);
@@ -251,6 +259,7 @@
         <div class="content">
             <h1 id="assignment-name">{{ assignment.subject }}: {{ assignment.name }}</h1>
             <p id="assignment-detail">{{ assignment.content }}</p>
+            <p id="assignment-posted-by">Posted by: {{ assignment.posted_by }}</p>
             <table id="forum">
                 {% for message in assignment.forum.values() %}
                     <tr>
