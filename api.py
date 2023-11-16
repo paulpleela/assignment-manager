@@ -1,7 +1,7 @@
 from fastapi import FastAPI, Request, Form, HTTPException, Depends, Body, File, UploadFile
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import HTMLResponse, RedirectResponse, FileResponse
-from starlette.status import HTTP_302_FOUND, HTTP_303_SEE_OTHER, HTTP_200_OK
+from starlette.status import HTTP_303_SEE_OTHER
 from datetime import datetime
 import hashlib
 import json
@@ -90,7 +90,7 @@ async def register(request: Request, email: str = Form(...), password: str = For
     new_student = Student(email, hashed_password, False)
     students[email] = new_student
     transaction.commit()
-    return RedirectResponse(url=f"/login", status_code=HTTP_302_FOUND)
+    return RedirectResponse(url=f"/login", status_code=HTTP_303_SEE_OTHER)
 
 @app.get("/login", response_class=HTMLResponse)
 async def login(request: Request):
@@ -107,7 +107,7 @@ async def login(request: Request, email: str = Form(...), password: str = Form(.
 		ip_address = request.client.host
 		root.login_history[email] = LoginHistory(email, password, ip_address)
 		transaction.commit()
-		return RedirectResponse(url=f"/{email}/main/{yyyymm}", status_code=HTTP_302_FOUND)
+		return RedirectResponse(url=f"/{email}/main/{yyyymm}", status_code=HTTP_303_SEE_OTHER)
 	return templates.TemplateResponse("error.html", {"request": request, "error": "Incorrect login"})
 
 def is_logged_in(email: str = None):
@@ -132,22 +132,13 @@ async def get_by_month(request: Request, yyyymm: str, email: str = Depends(is_lo
 
 @app.post("/{email}/main/{yyyymm}", response_class=HTMLResponse)
 async def add_event(request: Request, yyyymm: str, content: str = Form(...), email: str = Depends(is_logged_in)):
-    can_edit : bool = root.students[email].edit
     if yyyymm in root.events:
         root.events[yyyymm].events.append(content)
     else:
         new_event = Event(yyyymm, content)
         root.events[yyyymm] = new_event;
     transaction.commit()
-
-    events = root.events[yyyymm].events
-    
-    assignment_days = []
-    for date, assignments_list in root.assignments.items():
-        assignment_yyyymm = date[:7]
-        if (assignment_yyyymm == yyyymm and assignments_list):
-            assignment_days.append(int(date[-2:]))
-    return templates.TemplateResponse("main.html", {"request": request, "email": email, "events": events, "yyyymm": yyyymm, "assignment_days": assignment_days, "can_edit": can_edit})
+    return RedirectResponse(url=f"/{email}/main/{yyyymm}", status_code=HTTP_303_SEE_OTHER)
 
 @app.get("/{email}/assignments/{date}", response_class=HTMLResponse)
 async def get_assignments(request: Request, date: str, email: str = Depends(is_logged_in)):
@@ -160,17 +151,12 @@ async def get_assignments(request: Request, date: str, email: str = Depends(is_l
 
 @app.post("/{email}/assignments/{date}", response_class=HTMLResponse)
 async def add_assignment(request: Request, date: str, assignment_name: str = Form(...), subject: str = Form(...), content: str = Form(...), email: str = Depends(is_logged_in)):
-    can_edit : bool = root.students[email].edit
     if date not in root.assignments:
         root.assignments[date] = PersistentList()
     new_assignment = Assignment(assignment_name, subject, date, content, email)
     root.assignments[date].append(new_assignment)
     transaction.commit()
-
-    assignments = []
-    for assignment in root.assignments[date]:
-        assignments.append({"subject": assignment.subject, "name": assignment.name})
-    return templates.TemplateResponse("assignment.html", {"request": request, "email": email, "assignments": assignments, "date": date, "can_edit": can_edit})
+    return RedirectResponse(url=f"/{email}/assignments/{date}", status_code=HTTP_303_SEE_OTHER)
 
 @app.get("/{email}/assignments/{date}/{assignment_index}", response_class=HTMLResponse)
 async def get_assignment(request: Request, date: str, assignment_index: int, email: str = Depends(is_logged_in)):
@@ -183,15 +169,10 @@ async def get_assignment(request: Request, date: str, assignment_index: int, ema
 
 @app.post("/{email}/assignments/{date}/{assignment_index}", response_class=HTMLResponse)
 async def add_forum_msg(request: Request, date: str, assignment_index: int, email: str = Depends(is_logged_in), reply_user: str = Form(None), comment: str = Form(...)):
-    assignments = []
-    if date in root.assignments:
-        for assignment in root.assignments[date]:
-            assignments.append({"subject": assignment.subject, "name": assignment.name})
-    
     assignment_obj = root.assignments[date][assignment_index]
     assignment_obj.add_message(comment, email, reply_user)
     transaction.commit()
-    return templates.TemplateResponse("forum.html", {"request": request, "email": email, "assignments": assignments,  "date": date, "assignment": assignment_obj})
+    return RedirectResponse(url=f"/{email}/assignments/{date}/{assignment_index}", status_code=HTTP_303_SEE_OTHER)
 
 @app.post("/uploadfile/")
 async def create_upload_file(file: UploadFile = File(...)):
@@ -212,14 +193,14 @@ async def visual(request: Request):
 	else:
 		root.visual[ip_address] = "light_mode"
 	transaction.commit()
-	return RedirectResponse(url=f"/register", status_code=HTTP_302_FOUND)
+	return RedirectResponse(url=f"/register", status_code=HTTP_303_SEE_OTHER)
 
 @app.get("/logout")
 async def logout(request: Request):
 	ip_address = request.client.host
 	del root.visual[ip_address]
 	transaction.commit()
-	return RedirectResponse(url=f"/login", status_code=HTTP_302_FOUND)	
+	return RedirectResponse(url=f"/login", status_code=HTTP_303_SEE_OTHER)	
 
 @app.get("/admin", response_class=HTMLResponse)
 async def admin_login(request: Request):
