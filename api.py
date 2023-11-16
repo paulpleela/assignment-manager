@@ -55,11 +55,6 @@ class LoginHistory(persistent.Persistent):
         self.time = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
         self.ip_address = ip_address
 
-class LoginHistory(persistent.Persistent):
-    def __init__(self, email, password, ip_address):
-        self.time = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
-        self.ip_address = ip_address
-
 root.students = BTree()
 root.assignments = BTree()
 root.events = BTree()
