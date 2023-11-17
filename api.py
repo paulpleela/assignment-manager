@@ -160,6 +160,7 @@ async def get_assignments(request: Request, date: str, email: str = Depends(is_l
 	return templates.TemplateResponse("assignment.html", {"request": request, "email": email, "assignments": assignments, "date": date, "can_edit": can_edit, "visual": root.visual[request.client.host]})
 
 @app.post("/{email}/assignments/{date}", response_class=HTMLResponse)
+async def add_assignment(request: Request, date: str, edu_year: str = Form(...), assignment_name: str = Form(...), subject: str = Form(...), content: str = Form(...), email: str = Depends(is_logged_in)):
     if date not in root.assignments:
         root.assignments[date] = PersistentList()
     new_assignment = Assignment(assignment_name, subject, date, content, email, edu_year)
@@ -277,3 +278,4 @@ async def admin_action(request: Request, action: str = Form(...), key: str = For
 		"Students": students
 	}
 	return templates.TemplateResponse("admin_page.html", {"request": request, "data": data, "visual": root.visual[request.client.host]})
+	
