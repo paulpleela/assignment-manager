@@ -278,4 +278,11 @@ async def admin_action(request: Request, action: str = Form(...), key: str = For
 		"Students": students
 	}
 	return templates.TemplateResponse("admin_page.html", {"request": request, "data": data, "visual": root.visual[request.client.host]})
-	
+
+@app.get("year/{email}")
+async def get_year(email: str):
+	current_year = str(datetime.now().year)
+	current_year = (current_year[-2:] + 43) % 100
+	student_year = int(email[:2])
+	return (current_year - student_year + 1)
+
