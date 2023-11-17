@@ -169,6 +169,19 @@
             #go-back:active {
                 color: red;
             }
+
+			.delete_asn {
+				font-family: Arial, sans-serif;
+				font-size: 24px;
+				cursor: pointer;
+				background-color: #4781c0;
+				border-radius: 20px;
+			}
+
+			.delete_asn:hover {
+				background-color: #333;
+			}
+
         </style>
     </head>
     <body onload="on_load()">
@@ -178,12 +191,13 @@
         <div class="content">
             <div class="topic">Assignments</div>
             <ul id="assignments-list">
-                {% for assignment in assignments %}
-                    <li class="assignment-button" data-assignment-index="{{ loop.index0 }}">
-                        <div class="assignment-subject">{{ assignment.subject }}</div>
-                        <div class="assignment-name">{{ assignment.name }}</div>
-                    </li>
-                {% endfor %}
+				{% for assignment in assignments %}
+				<li class="assignment-button" data-assignment-index="{{ loop.index0 }}">
+					<div class="assignment-subject">{{ assignment.subject }}</div>
+					<div class="assignment-name">{{ assignment.name }}</div>
+					<button class="delete_asn" name="action" value="Delete" onclick="resolveDelete({{ loop.index0 }})">Delete</button>
+				</li>
+			{% endfor %}
             </ul>
 			{% if can_edit == True %}
                 <button id="openModal">Add Assignment</button>
@@ -244,6 +258,12 @@
                     modal.style.display = "none";
                 }
             }
+
+			function resolveDelete(index)
+			{
+			fetch (`/delete_assignment/{{ date }}/${index}`, {method: 'DELETE'})
+				.then(() => location.reload());
+			}
 
             function checkFields() {
 				let nameField = document.getElementById("assignment_name").value;
