@@ -206,6 +206,7 @@
             </ul>
 			{% if can_edit == True %}
                 <button id="openModal">Add Assignment</button>
+			{% endif %}
                 <div id="myModal" class="modal">
                     <div class="modal-content">
                         <div class="close">×</div>
@@ -240,7 +241,6 @@
                         </form>
                     </div>
                 </div>
-			{% endif %}
         <button id="go-back" onclick="goBack()">&#9664;</button>
 	</body>
         <script>
