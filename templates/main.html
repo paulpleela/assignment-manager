@@ -187,7 +187,7 @@
             <div class="header-box">
                 <button class="navigation clickable" onclick="prevMonth()">&lt;</button>
                 <div>
-                    <select name="edu_year" id="edu_year">
+                    <select name="edu_year" id="edu_year" onchange="changedYear()">
                         <option value="1">Year 1</option>
                         <option value="2">Year 2</option>
                         <option value="3">Year 3</option>
@@ -382,5 +382,9 @@
 				}
 			}
 
+            function changedYear() {
+                edu_year = document.getElementById("edu_year").value
+                window.location.href = `/{{ email }}/main/{{ yyyymm }}/${edu_year}`;
+            }
         </script>
 </html>

@@ -117,7 +117,7 @@ async def login(request: Request, email: str = Form(...), password: str = Form(.
 		ip_address = request.client.host
 		root.login_history[email] = LoginHistory(email, ip_address)
 		transaction.commit()
-		return RedirectResponse(url=f"/{email}/main/{yyyymm}", status_code=HTTP_303_SEE_OTHER)
+		return RedirectResponse(url=f"/{email}/main/{yyyymm}/1", status_code=HTTP_303_SEE_OTHER)
 	return templates.TemplateResponse("error.html", {"request": request, "error": "Incorrect login"})
 
 def is_logged_in(email: str = None):
@@ -125,9 +125,10 @@ def is_logged_in(email: str = None):
        raise HTTPException(status_code=HTTP_303_SEE_OTHER, detail="/login")
     return root.students[email].email
 
-@app.get("/{email}/main/{yyyymm}", response_class=HTMLResponse)
-async def get_by_month(request: Request, yyyymm: str, email: str = Depends(is_logged_in)):
-    can_edit : bool = root.students[email].edit
+
+@app.get("/{email}/main/{yyyymm}/{edu_year}", response_class=HTMLResponse)
+async def get_by_month(request: Request, yyyymm: str, edu_year: str, email: str = Depends(is_logged_in)):
+    can_edit: bool = root.students[email].edit
     if yyyymm in root.events:
         events = root.events[yyyymm].events
     else:
@@ -136,19 +137,25 @@ async def get_by_month(request: Request, yyyymm: str, email: str = Depends(is_lo
     assignment_days = []
     for date, assignments_list in root.assignments.items():
         assignment_yyyymm = date[:7]
-        if (assignment_yyyymm == yyyymm and assignments_list):
-            assignment_days.append(int(date[-2:]))
+        if assignment_yyyymm == yyyymm and assignments_list:
+            flag = False
+            for assignment in assignments_list:
+                if assignment.edu_year == edu_year:
+                    flag = True
+            if flag:
+                assignment_days.append(int(date[-2:]))
+
     return templates.TemplateResponse("main.html", {"request": request, "email": email, "events": events, "yyyymm": yyyymm, "assignment_days": assignment_days, "can_edit": can_edit, "visual": root.visual[request.client.host]})
 
-@app.post("/{email}/main/{yyyymm}", response_class=HTMLResponse)
-async def add_event(request: Request, yyyymm: str, content: str = Form(...), email: str = Depends(is_logged_in)):
+@app.post("/{email}/main/{yyyymm}/{edu_year}", response_class=HTMLResponse)
+async def add_event(request: Request, yyyymm: str, edu_year: str, content: str = Form(...), email: str = Depends(is_logged_in)):
     if yyyymm in root.events:
         root.events[yyyymm].events.append(content)
     else:
         new_event = Event(yyyymm, content)
         root.events[yyyymm] = new_event;
     transaction.commit()
-    return RedirectResponse(url=f"/{email}/main/{yyyymm}", status_code=HTTP_303_SEE_OTHER)
+    return RedirectResponse(url=f"/{email}/main/{yyyymm}/{edu_year}", status_code=HTTP_303_SEE_OTHER)
 
 @app.get("/{email}/assignments/{date}", response_class=HTMLResponse)
 async def get_assignments(request: Request, date: str, email: str = Depends(is_logged_in)):
