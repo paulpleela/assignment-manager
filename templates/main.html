@@ -386,8 +386,9 @@
 			}
 
             function changedYear() {
-                edu_year = document.getElementById("edu_year").value
+                let edu_year = document.getElementById("edu_year").value
                 window.location.href = `/{{ email }}/main/{{ yyyymm }}/${edu_year}`;
             }
+            document.getElementById("edu_year").selectedIndex = parseInt({{ edu_year }}) - 1;
         </script>
 </html>

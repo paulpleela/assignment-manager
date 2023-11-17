@@ -145,7 +145,7 @@ async def get_by_month(request: Request, yyyymm: str, edu_year: str, email: str 
             if flag:
                 assignment_days.append(int(date[-2:]))
 
-    return templates.TemplateResponse("main.html", {"request": request, "email": email, "events": events, "yyyymm": yyyymm, "assignment_days": assignment_days, "can_edit": can_edit, "visual": root.visual[request.client.host]})
+    return templates.TemplateResponse("main.html", {"request": request, "email": email, "events": events, "yyyymm": yyyymm, "assignment_days": assignment_days, "can_edit": can_edit, "visual": root.visual[request.client.host], "edu_year": edu_year})
 
 @app.post("/{email}/main/{yyyymm}/{edu_year}", response_class=HTMLResponse)
 async def add_event(request: Request, yyyymm: str, edu_year: str, content: str = Form(...), email: str = Depends(is_logged_in)):
