@@ -221,8 +221,11 @@
                 <h1>Events</h1>
                 <ul id="list-items">
                     {% for event in events %}
-                        <li>{{ event }} <input class="deleteButton" type="submit" value="Delete" name="action" onclick="resolveDelete('{{ loop.index0 }}')"></li>
-						
+                        <li>{{ event }} 
+							{% if can_edit == True %}
+								<input class="deleteButton" type="submit" value="Delete" name="action" onclick="resolveDelete('{{ loop.index0 }}')">
+							{% endif %}
+						</li>
                     {% endfor %}
                 </ul>
                 {% if can_edit == True %}
