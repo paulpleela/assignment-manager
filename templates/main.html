@@ -142,8 +142,6 @@
 				border-radius: 10px;
 			}
 
-			
-
             #log-out {
                 position: fixed;
                 bottom: 0;
@@ -159,6 +157,17 @@
 
             #log-out:active {
                 color: red;
+            }
+
+            #edu_year {
+                width: 100px;
+                margin: 10px;
+                margin-bottom: 5px;
+            }
+
+            h1 {
+                margin-top: 5px;
+                margin:10px;
             }
 
 			@keyframes slideLeft {
@@ -178,8 +187,13 @@
             <div class="header-box">
                 <button class="navigation clickable" onclick="prevMonth()">&lt;</button>
                 <div>
-                    <h2 id="year-header"></h2>
-                    <h1 id="month-header"></h1>
+                    <select name="edu_year" id="edu_year">
+                        <option value="1">Year 1</option>
+                        <option value="2">Year 2</option>
+                        <option value="3">Year 3</option>
+                        <option value="4">Year 4</option>
+                    </select>
+                    <h1 id="month-year-header"></h1>
                 </div>
                 <button class="navigation clickable" onclick="nextMonth()">&gt;</button>
             </div>
@@ -234,14 +248,12 @@
             let shownMonth = parseInt(yyyymm.slice(5, 7));
             let assignment_days = {{ assignment_days }};
 
-            const yearHeader = document.getElementById("year-header");
-            const monthHeader = document.getElementById("month-header");
+            const monthYearHeader = document.getElementById("month-year-header");
             const calendar = document.getElementById("calendar-body");
 
             function generateCalendar(year, month) {
                 month--; // Month index to 0 based.
-                yearHeader.innerHTML = shownYear;
-                monthHeader.innerHTML = new Date(shownYear, month).toLocaleDateString("en-US", {month: "long"});
+                monthYearHeader.innerHTML = `${new Date(shownYear, month).toLocaleDateString("en-US", {month: "long"})} ${shownYear}`;
                 const firstDay = new Date(year, month, 1).getDay(); // Day is 0 based starting from Sunday.
                 const lastDate = new Date(year, month + 1, 0).getDate();
                 let date = 1;
