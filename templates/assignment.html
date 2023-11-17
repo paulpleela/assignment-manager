@@ -94,6 +94,7 @@
                 font-size: 50px;
                 width: fit-content;
                 height: fit-content;
+				
             }
 
             .close:hover{
@@ -197,7 +198,9 @@
 				<li class="assignment-button" data-assignment-index="{{ loop.index0 }}">
 					<div class="assignment-subject">{{ assignment.subject }} , Year {{ assignment.edu_year }}</div>
 					<div class="assignment-name">{{ assignment.name }}</div>
-					<button class="delete_asn" name="action" value="Delete" onclick="resolveDelete({{ loop.index0 }})">Delete</button>
+					{% if can_edit == True %}
+						<button class="delete_asn" name="action" value="Delete" onclick="resolveDelete({{ loop.index0 }})">Delete</button>
+					{% endif %}
 				</li>
 			{% endfor %}
             </ul>
@@ -304,6 +307,13 @@
 					document.querySelector('div.topic').style.borderBottom = '5px solid #f4f4f4';
 					document.querySelector('div.topic').style.color = '#f4f4f4';
 					document.querySelector('div.topic').style.backgroundColor = '#333';
+					document.querySelector('.close').style.color = 'white';
+					document.querySelector('.close').addEventListener('mouseover', (event) => {
+						event.target.style.color = 'red';
+					});
+					document.querySelector('.close').addEventListener('mouseout', (event) => {
+						event.target.style.color = 'white';
+					});
 
 					document.querySelectorAll('li.assignment-button').forEach((assignment_button) => {
 						assignment_button.style.backgroundColor = '#9ccbfe';
