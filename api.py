@@ -19,18 +19,19 @@ connection = db.open()
 root = connection.root
 
 class Assignment(persistent.Persistent):
-    def __init__(self, name, subject, due_date, content, posted_by):
-        self.name = name
-        self.subject = subject
-        self.due_date = due_date
-        self.content = content
-        self.forum = BTree()
-        self.posted_by = posted_by
+	def __init__(self, name, subject, due_date, content, posted_by, edu_year):
+		self.name = name
+		self.subject = subject
+		self.due_date = due_date
+		self.content = content
+		self.forum = BTree()
+		self.posted_by = posted_by
+		self.edu_year = edu_year
     
-    def add_message(self, comment, user, reply_user=None, filename=None):
-        time = datetime.now().strftime("%d/%m/%Y %H:%M:%S.%f")[:-3]
-        new_message = Message(comment, user, time, reply_user, filename)
-        self.forum[time] = new_message
+	def add_message(self, comment, user, reply_user=None, filename=None):
+		time = datetime.now().strftime("%d/%m/%Y %H:%M:%S.%f")[:-3]
+		new_message = Message(comment, user, time, reply_user, filename)
+		self.forum[time] = new_message
 
 
 class Message(persistent.Persistent):
@@ -155,14 +156,13 @@ async def get_assignments(request: Request, date: str, email: str = Depends(is_l
 	assignments = []
 	if date in root.assignments:
 		for assignment in root.assignments[date]:
-			assignments.append({"subject": assignment.subject, "name": assignment.name})
+			assignments.append({"subject": assignment.subject, "name": assignment.name, "edu_year": assignment.edu_year})
 	return templates.TemplateResponse("assignment.html", {"request": request, "email": email, "assignments": assignments, "date": date, "can_edit": can_edit, "visual": root.visual[request.client.host]})
 
 @app.post("/{email}/assignments/{date}", response_class=HTMLResponse)
-async def add_assignment(request: Request, date: str, assignment_name: str = Form(...), subject: str = Form(...), content: str = Form(...), email: str = Depends(is_logged_in)):
     if date not in root.assignments:
         root.assignments[date] = PersistentList()
-    new_assignment = Assignment(assignment_name, subject, date, content, email)
+    new_assignment = Assignment(assignment_name, subject, date, content, email, edu_year)
     root.assignments[date].append(new_assignment)
     transaction.commit()
     return RedirectResponse(url=f"/{email}/assignments/{date}", status_code=HTTP_303_SEE_OTHER)

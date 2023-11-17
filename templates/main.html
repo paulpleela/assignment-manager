@@ -82,6 +82,10 @@
                     display: flex;
                     flex-direction: column;
                 }
+				.deleteButton
+				{
+					font-size : 10px;
+				}
             }
 
             .modal {
@@ -137,6 +141,8 @@
 				width : 20% ;
 				border-radius: 10px;
 			}
+
+			
 
             #log-out {
                 position: fixed;
@@ -201,7 +207,7 @@
                 <h1>Events</h1>
                 <ul id="list-items">
                     {% for event in events %}
-                        <li>{{ event }} <input type="submit" value="Delete" name="action" onclick="resolveDelete('{{ loop.index0 }}')"></li>
+                        <li>{{ event }} <input class="deleteButton" type="submit" value="Delete" name="action" onclick="resolveDelete('{{ loop.index0 }}')"></li>
 						
                     {% endfor %}
                 </ul>

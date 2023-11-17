@@ -56,7 +56,7 @@
             }
 
             
-            li.assignment-button {
+            li.assignment-button select {
                 padding: 10px;
                 text-transform: uppercase;
                 text-align: center;
@@ -182,6 +182,8 @@
 				background-color: #333;
 			}
 
+
+
         </style>
     </head>
     <body onload="on_load()">
@@ -193,7 +195,7 @@
             <ul id="assignments-list">
 				{% for assignment in assignments %}
 				<li class="assignment-button" data-assignment-index="{{ loop.index0 }}">
-					<div class="assignment-subject">{{ assignment.subject }}</div>
+					<div class="assignment-subject">{{ assignment.subject }} , Year {{ assignment.edu_year }}</div>
 					<div class="assignment-name">{{ assignment.name }}</div>
 					<button class="delete_asn" name="action" value="Delete" onclick="resolveDelete({{ loop.index0 }})">Delete</button>
 				</li>
@@ -210,6 +212,18 @@
                                     <td><label for="assignment_name">Assignment Name:</label></td>
                                     <td><input type="text" id="assignment_name" name="assignment_name"></td>
                                 </tr>
+								<tr>
+									<td>Year :</td>
+									<td>
+										<select name="edu_year" id="edu_year">
+											<option value="1">1</option>
+											<option value="2">2</option>
+											<option value="3">3</option>
+											<option value="4">4</option>
+										</select>
+									</td>
+									
+								</tr>
                                 <tr>
                                     <td><label for="subject">Subject:</label></td>
                                     <td><input type="text" id="subject" name="subject"></td>
