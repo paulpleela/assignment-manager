@@ -303,7 +303,7 @@
                 yyyymm = `${shownYear}-${shownMonth}`;
                 let path = window.location.href.substring(0, window.location.href.lastIndexOf('/'));
 				document.querySelector('body').style.animation = 'slideRight 0.8s ease-in-out';
-                window.location.href = `/{{ email }}/main/${yyyymm}`;
+                window.location.href = `/{{ email }}/main/${yyyymm}/{{ edu_year }}`;
             }
 
             function nextMonth() {
@@ -318,7 +318,7 @@
                 yyyymm = `${shownYear}-${shownMonth}`;
                 let path = window.location.href.substring(0, window.location.href.lastIndexOf('/'));
 				document.querySelector('body').style.animation = 'slideLeft 0.8s ease-in-out';
-                window.location.href = `/{{ email }}/main/${yyyymm}`;
+                window.location.href = `/{{ email }}/main/${yyyymm}/{{ edu_year }}`;
             }
 
             var modal = document.getElementById("myModal");

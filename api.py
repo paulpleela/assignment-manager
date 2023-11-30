@@ -72,10 +72,9 @@ if not hasattr(root, 'login_history'):
     root.login_history = BTree()
 if not hasattr(root, 'visual'):
     root.visual = {}
-
-
+	
+transaction.commit()
 app = FastAPI()
-
 templates = Jinja2Templates(directory="templates")
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
