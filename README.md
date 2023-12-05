@@ -3,6 +3,19 @@
 
 The Assignment Manager is a web application designed for Software Engineering students to effectively manage and track their assignments. This project provides a platform for students to access a calendar displaying upcoming assignments and events. Additionally, it offers a forum feature for students to discuss assignment details, promoting collaboration within the community.
 
+- [Features](#features)
+  - [User Authentication](#user-authentication)
+  - [Admin Dashboard](#admin-dashboard)
+  - [Main Calendar](#main-calendar)
+  - [View Assignments](#view-assignments)
+- [Technologies Used](#technologies-used)
+- [Getting Started](#getting-started)
+  - [Prerequisites](#prerequisites)
+  - [Installation](#installation)
+  - [Running the Application](#running-the-application)
+- [Contributors](#contributors)
+- [License](#license)
+
 
 ## Features
 
@@ -30,7 +43,7 @@ The Assignment Manager is a web application designed for Software Engineering st
 ### View Assignments
 
 * **Assignments List:** Displays a list of assignments due on the date chosen from the main calendar. Permitted users can add and remove assignments from this list.
-* **Assignment Page:** Clicking on an assignment in this list opens up its assignment page. This page shows assignment details and has a discussion forum that can send messages and files.
+* **Assignment Page:** Clicking on an assignment in this list opens up its assignment page. This page shows assignment details and has a discussion forum that can post messages and files.
 ![assignment forum](https://i.imgur.com/7Fw0Xy3.png)
 
 
@@ -53,7 +66,7 @@ Follow these steps to set up and run the Homework Calendar web application on yo
 
 ### Installation
 
-1. Clone the repository:
+1. Clone this repository:
 
     ```bash
     git clone https://github.com/Pixako-Unrealistia/Assignment-manager.git
@@ -67,7 +80,7 @@ Follow these steps to set up and run the Homework Calendar web application on yo
 
 ### Running the Application
 
-1. Start the FastAPI server:
+1. Start the FastAPI server (The default port is 8000):
 
     ```bash
     uvicorn api:app
